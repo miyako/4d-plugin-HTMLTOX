@@ -97,7 +97,7 @@ OPEN WEB URL($path)
 
 Remarks
 ---
-Because Qt (used by wkhtmltopdf) needs to run in the main thread, there is no easy way to implement callbacks; the method runs, but too fact to display or update 4D dialogs, including the PROGRESS component.
+Because Qt (used by wkhtmltopdf) needs to run in the main thread, there is no easy way to implement callbacks; the method runs, but too fast to display or update 4D dialogs, including the PROGRESS component.
 
 Still, for logging purposes you can do the following.
 
