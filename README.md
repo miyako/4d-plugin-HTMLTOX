@@ -1,9 +1,7 @@
 # 4d-plugin-HTMLTOX
-4D implementation of wkhtmltopdf
+4D implementation of wkhtmltopdf. 
 
-About
----
-Based on [wkhtmltopdf 0.12.2.1](http://wkhtmltopdf.org/) this is a incompatible replacement for [html-converter](https://github.com/miyako/4d-plugin-html-converter)
+**CAUTION**: Mac OS only. It seem impossible to call the DLL version of wkhtmltopdf fron 4D; tried MinGW, MSVC, with various options, it just seems to crash when the library is called from the main process (used to work before v14). It might be better to LAUNCH EXTERNAL PROCESS an executable instead.
 
 ###Platform 
 
@@ -11,6 +9,10 @@ OS X 10.6+ 4D 32 bits
 OS X 10.8+ 4D 32/64 bits
 
 4D Intel v11 or later.
+
+About
+---
+Based on [wkhtmltopdf 0.12.2.1](http://wkhtmltopdf.org/) this is a incompatible replacement for [html-converter](https://github.com/miyako/4d-plugin-html-converter)
 
 Examples
 ---
