@@ -1,7 +1,7 @@
 # 4d-plugin-HTMLTOX
 4D implementation of wkhtmltopdf. 
 
-**CAUTION**: Mac OS only. It seem impossible to call the DLL version of wkhtmltopdf fron 4D; tried MinGW, MSVC, with various options, it just seems to crash when the library is called from the main process (used to work before v14). It might be better to LAUNCH EXTERNAL PROCESS an executable instead.
+**CAUTION**: Mac OS only. It seem impossible to call the DLL version of wkhtmltopdf fron 4D; tried MinGW, MSVC, with various options, it just seems to crash when the library is called from the main process (used to work before v14; **Maybe the threading model in 4D/Windows has changed?**). It might be better to LAUNCH EXTERNAL PROCESS an executable instead.
 
 ###Platform 
 
