@@ -12,7 +12,7 @@ OS X 10.8+ 4D 32/64 bits
 
 About
 ---
-Based on [wkhtmltopdf 0.12.2.1](http://wkhtmltopdf.org/) this is a incompatible replacement for [html-converter](https://github.com/miyako/4d-plugin-html-converter)
+Based on [wkhtmltopdf 0.12.2.1](http://wkhtmltopdf.org/) this is an incompatible replacement for [html-converter](https://github.com/miyako/4d-plugin-html-converter)
 
 Examples
 ---
