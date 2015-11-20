@@ -25,7 +25,6 @@ namespace wkhtmltox
         const char *data;
     }params;
     
-    //on windows it is unsafe to setup right away
     bool isReady = false;
     
     //globals; the library runs on the main process, so lets prohibit paralell calls
@@ -37,7 +36,11 @@ namespace wkhtmltox
     C_LONGINT intParam;
     C_TEXT stringParam;
     C_TEXT callbackType;
+
+//not used; it seems impossible to execute a 4D user process from the main process by unfreeaing a monitor process
+//we will start a new local process each time
     
+    /*
     namespace listener
     {
         bool shouldTerminate = false;
@@ -45,10 +48,8 @@ namespace wkhtmltox
         progress_id_t processId = 0;
         C_TEXT processName;
     }
+     */
 
-//it seems impossible to execute a 4D user process from the main process by unfreeaing a monitor process
-//we will start a new local process each time
-    
 #pragma mark PDF (callback)
 
     void pdf_progress_cb(wkhtmltopdf_converter * converter, const int val)
@@ -119,6 +120,7 @@ namespace wkhtmltox
 
     namespace internal
     {
+#pragma mark -
         void init()
         {
             wkhtmltopdf_init(0);
@@ -260,6 +262,8 @@ namespace wkhtmltox
     {
         PA_RunInMainProcess((PA_RunInMainProcessProcPtr)wkhtmltox::internal::image_destroy_converter, params);
     }
+
+#pragma mark -
     
     void init()
     {
@@ -350,15 +354,16 @@ bool IsProcessOnExit(){
 //OnStartup and OnExit shall be executed in the main process
 
 void OnStartup(){
+//    init is deferred to first call
 //    wkhtmltopdf_init(0);
 //    wkhtmltoimage_init(0);
     
-    CUTF8String name((const uint8_t *)"$HTML_CONVERTER_II");
-    wkhtmltox::listener::processName.setUTF8String(&name);
+//    CUTF8String name((const uint8_t *)"$HTML_CONVERTER_II");
+//    wkhtmltox::listener::processName.setUTF8String(&name);
 }
 
 void OnExit(){
-//    the database may be closed but 4D can still be running.
+//    can't deinit in plugin; the database may be closed but 4D can still be running...
 //    wkhtmltopdf_deinit();
 //    wkhtmltoimage_deinit();
 }
@@ -480,16 +485,18 @@ void listenerLoopExecuteMethod(){
         PA_SetLongintVariable(&params[1], wkhtmltox::processId);
         PA_SetLongintVariable(&params[2], wkhtmltox::progressId);
         
-        PA_Unistring stringParam = PA_CreateUnistring((PA_Unichar *)wkhtmltox::stringParam.getUTF16StringPtr());
-        PA_SetStringVariable(&params[3], &stringParam);
-
-        PA_Unistring callbackType = PA_CreateUnistring((PA_Unichar *)wkhtmltox::callbackType.getUTF16StringPtr());
-        PA_SetStringVariable(&params[4], &callbackType);
+//        PA_Unistring stringParam = PA_CreateUnistring((PA_Unichar *)wkhtmltox::stringParam.getUTF16StringPtr());
+//        PA_SetStringVariable(&params[3], &stringParam);
+        PA_SetUnistring( (&(params[3].uValue.fString)), (PA_Unichar *)wkhtmltox::stringParam.getUTF16StringPtr());
+        
+//        PA_Unistring callbackType = PA_CreateUnistring((PA_Unichar *)wkhtmltox::callbackType.getUTF16StringPtr());
+//        PA_SetStringVariable(&params[4], &callbackType);
+        PA_SetUnistring( (&(params[4].uValue.fString)), (PA_Unichar *)wkhtmltox::callbackType.getUTF16StringPtr());
         
         PA_ExecuteMethodByID(wkhtmltox::methodId, params, 5);
         
-        PA_DisposeUnistring(&stringParam);
-        PA_DisposeUnistring(&callbackType);
+//        PA_DisposeUnistring(&stringParam);
+//        PA_DisposeUnistring(&callbackType);
         
         PA_ClearVariable(&params[0]);
         PA_ClearVariable(&params[1]);
@@ -515,14 +522,16 @@ void CommandDispatcher (PA_long32 pProcNum, sLONG_PTR *pResult, PackagePtr pPara
 {
 	switch(pProcNum)
 	{
+    
         case kInitPlugin :
         case kServerInitPlugin :
-            PA_RunInMainProcess((PA_RunInMainProcessProcPtr)OnStartup, NULL);
-            break;    
+//            OnStartup();
+            break;
 
         case kCloseProcess :            
-            OnCloseProcess();
+//            OnCloseProcess();
             break;
+            
 // --- HTMLTOX
 
 		case 1 :
