@@ -279,23 +279,27 @@ namespace wkhtmltox
     PA_long32 testPathName(CUTF8String &pathName)
     {
         PA_long32 resultCode = 0;
-        PA_Variable args[1];
         
-        args[0] = PA_CreateVariable(eVK_Unistring);
+        PA_Variable params[1];
+        params[0] = PA_CreateVariable(eVK_Unistring);
         
         C_TEXT temp;
         temp.setUTF8String(&pathName);
-        PA_Unistring ustr = PA_CreateUnistring((PA_Unichar *)temp.getUTF16StringPtr());
-        PA_SetStringVariable(&args[0], &ustr);
         
-        PA_Variable result = PA_ExecuteCommandByID(CMU_Test_path_name, args, 1);
+//        PA_Unistring ustr = PA_CreateUnistring((PA_Unichar *)temp.getUTF16StringPtr());
+//        PA_SetStringVariable(&args[0], &ustr);
+        
+        PA_SetUnistring( (&(params[0].uValue.fString)), (PA_Unichar *)temp.getUTF16StringPtr());
+        
+        PA_Variable result = PA_ExecuteCommandByID(CMU_Test_path_name, params, 1);
         if(PA_GetVariableKind(result) == eVK_Longint)
         {
             resultCode = PA_GetLongintVariable(result);
         }
         
-        PA_DisposeUnistring(&ustr);
-        PA_ClearVariable(&args[0]);
+//        PA_DisposeUnistring(&ustr);
+
+        PA_ClearVariable(&params[0]);
         
         return resultCode;
     }
