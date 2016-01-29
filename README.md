@@ -7,11 +7,18 @@
 
 | carbon | cocoa | win32 | win64 |
 |:------:|:-----:|:---------:|:---------:|
-|🆗|🆗|🆗|🆗|
+|🆗|🆗|🚫|🚫|
 
 About
 ---
 Based on [wkhtmltopdf 0.12.2.1](http://wkhtmltopdf.org/) this is an incompatible replacement for [html-converter](https://github.com/miyako/4d-plugin-html-converter)
+
+Commands
+---
+
+```c
+HTML_Convert
+```
 
 Examples
 ---
