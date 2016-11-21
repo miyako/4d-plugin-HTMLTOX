@@ -67,12 +67,6 @@ OPEN WEB URL($path)
 HTML to PNG, BMP, JPG, SVG
 
 ```
-  //the wkhtmltopdf library version is 0.12.2.1, from January 19, 2015
-  //http://wkhtmltopdf.org/downloads.html
-
-$path:=Get 4D folder(Current resources folder)+"index.html"
-
-  //3 ways to provide source
 ARRAY TEXT($html;1)  //only the first element is used for image
 $html{1}:="http://wkhtmltopdf.org/"
 
@@ -83,22 +77,22 @@ ARRAY TEXT($optionValues;0)
 $resultBlob:=HTML Convert ($html;HTMLTOX Format PNG;$optionKeys;$optionValues)
 $path:=Temporary folder+Generate UUID+".png"
 BLOB TO DOCUMENT($path;$resultBlob)
-OPEN WEB URL($path)
+OPEN URL($path)
 
 $resultBlob:=HTML Convert ($html;HTMLTOX Format SVG;$optionKeys;$optionValues)
 $path:=Temporary folder+Generate UUID+".svg"
 BLOB TO DOCUMENT($path;$resultBlob)
-OPEN WEB URL($path)
+OPEN URL($path)
 
 $resultBlob:=HTML Convert ($html;HTMLTOX Format BMP;$optionKeys;$optionValues)
 $path:=Temporary folder+Generate UUID+".bmp"
 BLOB TO DOCUMENT($path;$resultBlob)
-OPEN WEB URL($path)
+OPEN URL($path)
 
 $resultBlob:=HTML Convert ($html;HTMLTOX Format JPG;$optionKeys;$optionValues)
 $path:=Temporary folder+Generate UUID+".jpg"
 BLOB TO DOCUMENT($path;$resultBlob)
-OPEN WEB URL($path)
+OPEN URL($path)
 ```
 
 Remarks
