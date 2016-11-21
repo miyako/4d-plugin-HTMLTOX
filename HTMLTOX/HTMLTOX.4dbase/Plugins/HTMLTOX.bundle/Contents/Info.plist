@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>BuildMachineOSBuild</key>
-	<string>15B42</string>
+	<string>15G31</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
 	<string>HTMLTOX</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.4D.4DPlugin.HTMLTOX</string>
+	<string>com.4D.4DPlugin.HTMLTOX-2</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
