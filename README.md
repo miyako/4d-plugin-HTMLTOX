@@ -15,7 +15,7 @@ Passing raw HTML is no longer supported. Only a URL or system path should be pas
 
 About
 ---
-Based on [wkhtmltopdf 0.12.2.3](http://wkhtmltopdf.org/) this is an incompatible replacement for [html-converter](https://github.com/miyako/4d-plugin-html-converter)
+Based on [wkhtmltopdf 0.12.2.3](http://wkhtmltopdf.org/).
 
 Commands
 ---
@@ -26,7 +26,9 @@ HTML_Convert
 
 Examples
 ---
-HTML to PDF
+
+* HTML to PDF
+
 ```
   //the wkhtmltopdf library version is 0.12.2.1, from January 19, 2015
   //http://wkhtmltopdf.org/downloads.html
@@ -68,7 +70,7 @@ BLOB TO DOCUMENT($path;$resultBlob)
 OPEN WEB URL($path)
 ```
 
-HTML to PNG, BMP, JPG, SVG
+* HTML to PNG, BMP, JPG, SVG
 
 ```
 ARRAY TEXT($html;1)  //only the first element is used for image
@@ -99,13 +101,7 @@ BLOB TO DOCUMENT($path;$resultBlob)
 OPEN URL($path)
 ```
 
-Remarks
----
-Because Qt (used by wkhtmltopdf) needs to run in the main thread, there is no easy way to implement callbacks; the method runs, but too fast to display or update 4D dialogs, including the PROGRESS component.
-
-Still, for logging purposes you can do the following.
-
-###HTMLTOX_CALLBACK
+* Notification
 
 ```
 C_LONGINT($1;$intValue)  //for progress, finished
