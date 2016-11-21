@@ -110,8 +110,6 @@ C_LONGINT($3;$progressId)  //if 4d.progressId is passed
 C_TEXT($4;$stringValue)  //for warning, error
 C_TEXT($5;$callbackType)  //one of the following: progress, warning, error, finished
 
-  //unfortunately the interval is such that the progress bar will not update instantly
-
 $intValue:=$1
 $processNumber:=$2
 $progressId:=$3
@@ -119,49 +117,42 @@ $stringValue:=$4
 $callbackType:=$5
 
 Case of 
-: ($callbackType="progress")
-
-Progress SET PROGRESS ($progressId;$intValue/100)
-
-: ($callbackType="finished")
-
-Progress SET MESSAGE ($progressId;"complete!")
-
+	: ($callbackType="progress")
+		
+		Progress SET PROGRESS ($progressId;$intValue/100)
+		
+	: ($callbackType="finished")
+		
+		If ($intValue=1)
+			Progress SET MESSAGE ($progressId;"complete!")
+		End if 
+		
+	: ($callbackType="warning")
+		
+	: ($callbackType="error")
+		
 End case 
-
-$wiD:=Open window(0;0;200;200)
-MESSAGE(String($intValue))
-
-CALL PROCESS($processNumber)
 ```
 
+* Usage with callback
+
 ```
-  //the wkhtmltopdf library version is 0.12.2.1, from January 19, 2015
-  //http://wkhtmltopdf.org/downloads.html
-
-$path:=Get 4D folder(Current resources folder)+"index.html"
-
-ARRAY TEXT($html;3)
-$html{1}:="http://wkhtmltopdf.org/"
-$html{2}:="some html source"  //string
-$html{3}:=$path
-
-  //for full list of keys, see http://wkhtmltopdf.org/libwkhtmltox/
-ARRAY TEXT($optionKeys;0)
+ ARRAY TEXT($optionKeys;0)
 ARRAY TEXT($optionValues;0)
-  //special consideration: for per-object (page) settings, 
-  //prefix the key with an element number corresponding to the array of htmls.
-  //e.g. "size.paperSize" this is a global setting
-  //"1:toc.useDottedLines" this is a per-object setting for $html{1}
-
-APPEND TO ARRAY($optionKeys;"size.paperSize")
-APPEND TO ARRAY($optionValues;"A4")
-
-APPEND TO ARRAY($optionKeys;"orientation")
-APPEND TO ARRAY($optionValues;"Landscape")
 
 $progressId:=Progress New 
 Progress SET PROGRESS ($progressId;0)
+
+ARRAY TEXT($html;3)
+$html{1}:=Get 4D folder(Current resources folder)+"sample1.html"
+$html{2}:=Get 4D folder(Current resources folder)+"sample1.html"
+$html{3}:=Get 4D folder(Current resources folder)+"sample1.html"
+
+  //global
+APPEND TO ARRAY($optionKeys;"size.paperSize")
+APPEND TO ARRAY($optionValues;"A4")
+APPEND TO ARRAY($optionKeys;"orientation")
+APPEND TO ARRAY($optionValues;"Landscape")
 
   //special options for 4d
 APPEND TO ARRAY($optionKeys;"4d.progressId")
@@ -170,12 +161,17 @@ APPEND TO ARRAY($optionValues;String($progressId))
 APPEND TO ARRAY($optionKeys;"4d.callbackMethodName")
 APPEND TO ARRAY($optionValues;"HTMLTOX_CALLBACK")
 
-  //callback is called for the following: progress, warning, error, finished
-  //however, the interval is such that the progress bar will not update instantly
-  //still, you can use it for logging, etc.
 $resultBlob:=HTML Convert ($html;HTMLTOX Format PDF;$optionKeys;$optionValues)
 
 Progress QUIT ($progressId)
 
-BLOB TO DOCUMENT(System folder(Desktop)+Generate UUID+".pdf";$resultBlob)
+If (BLOB size($resultBlob)#0)
+	
+	$dstPath:=Temporary folder+Generate UUID+".pdf"
+	
+	BLOB TO DOCUMENT($dstPath;$resultBlob)
+	
+	OPEN URL($dstPath)
+	
+End if 
 ```
