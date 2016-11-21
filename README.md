@@ -1,7 +1,11 @@
 # 4d-plugin-HTMLTOX
 4D implementation of wkhtmltopdf. 
 
-Updated for 15R5 and above.
+##New
+
+Passing raw HTML is no longer supported. Only a URL or system path should be passed.
+
+``libwkhtmltox`` is no longer linked as a dylib; instead, a command line program is invoked internally.
 
 ##Platform
 
