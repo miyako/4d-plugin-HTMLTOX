@@ -3,7 +3,9 @@
 
 ##Releases
 
-[64 bit](https://github.com/miyako/4d-plugin-HTMLTOX/releases/tag/0.12.3)
+[64 bit bundle for 4D v15 and later](https://github.com/miyako/4d-plugin-HTMLTOX/releases/tag/0.12.3.64)
+
+[32/64 bit bundle for 4D v15 and later](https://github.com/miyako/4d-plugin-HTMLTOX/releases/tag/0.12.3.32)
 
 ##New
 
