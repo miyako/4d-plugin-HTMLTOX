@@ -1,6 +1,10 @@
 # 4d-plugin-HTMLTOX
 4D implementation of wkhtmltopdf. 
 
+##Releases
+
+[64 bit](https://github.com/miyako/4d-plugin-HTMLTOX/releases/tag/0.12.3)
+
 ##New
 
 Passing raw HTML is no longer supported. Only a URL or system path should be passed.
