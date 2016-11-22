@@ -137,7 +137,7 @@ End case
 * Usage with callback
 
 ```
- ARRAY TEXT($optionKeys;0)
+ARRAY TEXT($optionKeys;0)
 ARRAY TEXT($optionValues;0)
 
 $progressId:=Progress New 
