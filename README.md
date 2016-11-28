@@ -9,7 +9,13 @@
 
 ##New
 
-Passing raw HTML is no longer supported. Only a URL or system path should be passed.
+Callback feature is disabled in ``v2.0``. 
+
+You can again pass raw HTML as source.
+
+The helper app is launched per process and stays running for the lifetime of that process.
+
+~~Passing raw HTML is no longer supported. Only a URL or system path should be passed.~~
 
 ``libwkhtmltox`` is no longer linked as a dylib; instead, a command line program is invoked internally.
 
