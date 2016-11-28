@@ -17,6 +17,8 @@ The helper app is launched per process and stays running for the lifetime of tha
 
 ``libwkhtmltox`` is no longer linked as a dylib; instead, a command line program is invoked internally.
 
+**TODO**: Check caller process ID so that multiple instances of 4D can use the plugin.
+
 ##Platform
 
 | carbon | cocoa | win32 | win64 |
