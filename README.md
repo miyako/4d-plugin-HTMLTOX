@@ -40,9 +40,6 @@ Examples
 * HTML to PDF
 
 ```
-  //the wkhtmltopdf library version is 0.12.2.1, from January 19, 2015
-  //http://wkhtmltopdf.org/downloads.html
-
 $path:=Get 4D folder(Database folder)+\
 "Plugins"+Folder separator+\
 "HTMLTOX.bundle"+Folder separator+\
