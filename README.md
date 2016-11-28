@@ -3,27 +3,17 @@
 
 ##Releases
 
-* v2.0
-
 [64 bit bundle for 4D v15 and later](https://github.com/miyako/4d-plugin-HTMLTOX/releases/tag/2.0.64)
 
 [32/64 bit bundle for 4D v15 and later](https://github.com/miyako/4d-plugin-HTMLTOX/releases/tag/2.0.32)
 
-* v1.0
-
-[64 bit bundle for 4D v15 and later](https://github.com/miyako/4d-plugin-HTMLTOX/releases/tag/0.12.3.64)
-
-[32/64 bit bundle for 4D v15 and later](https://github.com/miyako/4d-plugin-HTMLTOX/releases/tag/0.12.3.32)
-
 ##New
 
-Callback feature is disabled in ``v2.0``. 
+Callback feature is deprecated. 
 
-You can again pass raw HTML as source.
+You can pass file path, URL or raw HTML as source.
 
 The helper app is launched per process and stays running for the lifetime of that process.
-
-~~Passing raw HTML is no longer supported. Only a URL or system path should be passed.~~
 
 ``libwkhtmltox`` is no longer linked as a dylib; instead, a command line program is invoked internally.
 
@@ -121,7 +111,7 @@ BLOB TO DOCUMENT($path;$resultBlob)
 OPEN URL($path)
 ```
 
-* Notification
+* With callback (deprecated)
 
 ```
 C_LONGINT($1;$intValue)  //for progress, finished
@@ -154,7 +144,7 @@ Case of
 End case 
 ```
 
-* Usage with callback
+* Callback (deprecated)
 
 ```
 ARRAY TEXT($optionKeys;0)
