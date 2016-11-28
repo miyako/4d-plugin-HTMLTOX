@@ -13,110 +13,277 @@
 #include "4DPlugin.h"
 
 #pragma mark -
-//
-//int test(const char *src){
-//	
-//	int page_num = 0;
-//	
-//	CFStringRef c = CFStringCreateWithCString(kCFAllocatorDefault, src, kCFStringEncodingUTF8);
-//	if(c)
-//	{
-//		CFRange r = CFStringFind(c, CFSTR(":"), 0);
-//		if(r.location != kCFNotFound)
-//		{
-//			CFStringRef n = CFStringCreateWithSubstring(kCFAllocatorDefault, c, CFRangeMake(0, r.location));
-//			if(n)
-//			{
-//				page_num = CFStringGetIntValue(n);
-//				
-//				CFStringRef m = CFStringCreateWithSubstring(kCFAllocatorDefault, c, CFRangeMake(r.location+1, CFStringGetLength(c) - r.location+1));
-//				
-//				if(m)
-////				{
-//					CFRelease(m);
-//				}
-//				
-//				CFRelease(n);
-//			}
-//		}
-//		CFRelease(c);
-//	}
-//	return page_num;
-//}
 
+#define HELPER_NAME @"htmltox4d"
 
-namespace HTMLTOX
+namespace HTMLTOX4D
 {
-	std::vector<CUTF16String>CALLBACK_PARAM_TYPE;
-	std::vector<CUTF16String>CALLBACK_PARAM_STR;
-	std::vector<int>CALLBACK_PARAM_INT;
-	std::vector<int>CALLBACK_PARAM_PID;
-	std::map<int, int> PROGRESS_PID;
+	CFNotificationCenterRef center = NULL;
+	NSString *launchPath;
 	
-	void append(CUTF16String &utype, CUTF16String &ustr, int val, int pid)
-	{
-		CALLBACK_PARAM_TYPE.push_back(utype);
-		CALLBACK_PARAM_STR.push_back(ustr);
-		CALLBACK_PARAM_INT.push_back(val);
-		CALLBACK_PARAM_PID.push_back(pid);
-	}
+	typedef PA_long32 internal_process_number_t;
+	typedef int external_process_number_t;
 	
-	void clear()
-	{
-		CALLBACK_PARAM_TYPE.clear();
-		CALLBACK_PARAM_STR.clear();
-		CALLBACK_PARAM_INT.clear();
-		CALLBACK_PARAM_PID.clear();
-		PROGRESS_PID.clear();
-	}
+	std::map<internal_process_number_t, NSTask *> processes;
+	std::map<internal_process_number_t, NSData *> results;
 	
-	void erase(int processId)
+	void clear_buffer(internal_process_number_t pid)
 	{
-		auto t = HTMLTOX::CALLBACK_PARAM_TYPE.begin();
-		auto s = HTMLTOX::CALLBACK_PARAM_STR.begin();
-		auto i = HTMLTOX::CALLBACK_PARAM_INT.begin();
-		auto p = HTMLTOX::CALLBACK_PARAM_PID.begin();
+		std::map<internal_process_number_t, NSData *>::iterator find;
+		find = results.find(pid);
 		
-		while (p != CALLBACK_PARAM_PID.end())
+		if(find != results.end())
 		{
-			if(*p == processId)
+			NSData *data = find->second;
+			results.erase(find);
+			[data release];
+		}
+	}
+	
+	void terminate_helper(internal_process_number_t pid)
+	{
+		std::map<internal_process_number_t, NSTask *>::iterator find;
+		find = processes.find(pid);
+		
+		if(find != processes.end())
+		{
+			NSTask *task = find->second;
+			
+			if([task isRunning])
 			{
-				t = CALLBACK_PARAM_TYPE.erase(t);
-				s = CALLBACK_PARAM_STR.erase(s);
-				i = CALLBACK_PARAM_INT.erase(i);
-				p = CALLBACK_PARAM_PID.erase(p);
+				NSMutableDictionary *userInfo = [[NSMutableDictionary alloc]init];
+				
+				[userInfo setObject:@"terminate" forKey:@"command"];
+				[userInfo setObject:[NSNumber numberWithInt:(int)pid] forKey:@"pid"];
+				
+				CFNotificationCenterPostNotification(center,
+																						 htmltox4d_notification_name,
+																						 NULL,
+																						 (CFDictionaryRef)userInfo,
+																						 true);
+				[userInfo release];
+				
+				NSLog(@"%@:%i was terminated for process:%i", HELPER_NAME, [task processIdentifier], (int)pid);
 			}
-			else
+			
+			processes.erase(find);
+			[task release];
+		}
+	}
+	
+	void cleanup()
+	{
+		internal_process_number_t pid = PA_GetCurrentProcessNumber();
+		terminate_helper(pid);
+		clear_buffer(pid);
+	}
+	
+	void resume_process(CFDictionaryRef userInfo)
+	{
+		if(CFDictionaryContainsKey(userInfo, USERINFOKEY_PID))
+		{
+			int local_pid = 0;
+			CFNumberRef remote_pid = (CFNumberRef)CFDictionaryGetValue(userInfo, USERINFOKEY_PID);
+			if(CFNumberGetValue(remote_pid, kCFNumberIntType, &local_pid))
 			{
-				++t;
-				++s;
-				++i;
-				++p;
+				PA_UnfreezeProcess(local_pid);
+			}
+			
+		}
+	}
+	
+	void set_data(CFDictionaryRef userInfo)
+	{
+		if(CFDictionaryContainsKey(userInfo, USERINFOKEY_PID))
+		{
+			int local_pid = 0;
+			CFNumberRef remote_pid = (CFNumberRef)CFDictionaryGetValue(userInfo, USERINFOKEY_PID);
+			if(CFNumberGetValue(remote_pid, kCFNumberIntType, &local_pid))
+			{
+				if(CFDictionaryContainsKey(userInfo, USERINFOKEY_DATA))
+				{
+					std::map<internal_process_number_t, NSData *>::iterator find;
+					find = results.find(local_pid);
+					if(find == results.end())
+					{
+						NSData *data = [[NSData alloc]initWithData:(NSData *)CFDictionaryGetValue(userInfo, USERINFOKEY_DATA)];
+						results.insert(std::pair<internal_process_number_t, NSData *>(local_pid, data));
+					}else{
+						NSData *data = find->second;
+						[data release];
+						find->second = [[NSData alloc]initWithData:(NSData *)CFDictionaryGetValue(userInfo, USERINFOKEY_DATA)];
+					}
+				}
 			}
 		}
 	}
 	
-	void clear(int processId)
+	void process_notification(CFNotificationCenterRef center,
+														void *observer,
+														CFStringRef name,
+														const void *object,
+														CFDictionaryRef userInfo)
 	{
-		auto it = PROGRESS_PID.find(processId);
-		if(it != PROGRESS_PID.end()) {
-			PROGRESS_PID.erase(it);
+		if(CFDictionaryContainsKey(userInfo, USERINFOKEY_DATA))
+		{
+			set_data(userInfo);
 		}
-		erase(processId);
+		
+		resume_process(userInfo);
 	}
 	
-	int getProgressForProcess(int processId)
+
+	
+	NSTask *start_helper(internal_process_number_t currentProcessId)
 	{
-		auto it = PROGRESS_PID.find(processId);
-		if(it != PROGRESS_PID.end()) {
-			return it->second;
-		}
-		return 0;
+		NSTask *task = [[NSTask alloc]init];
+		[task setLaunchPath:HTMLTOX4D::launchPath];
+		
+		NSMutableArray *arguments = [[NSMutableArray alloc]init];
+		[arguments addObject:@"pid"];
+		[arguments addObject:[NSString stringWithFormat:@"%i", (int)currentProcessId]];
+		[task setArguments:arguments];
+		[arguments release];
+		
+		[task launch];
+		
+		PA_FreezeProcess(currentProcessId);
+		
+		return task;
 	}
 	
-	void setProgressForProcess(int processId, int progress)
+	bool init()
 	{
-		PROGRESS_PID[processId] = progress;
+		internal_process_number_t currentProcessId = PA_GetCurrentProcessNumber();
+		std::map<internal_process_number_t, NSTask *>::iterator find;
+		find = processes.find(currentProcessId);
+		
+		if(find == processes.end())
+		{
+			NSTask *task = start_helper(currentProcessId);
+			processes.insert(std::pair<internal_process_number_t, NSTask *>(currentProcessId, task));
+			NSLog(@"%@:%i was launched for process:%i", HELPER_NAME, [task processIdentifier], (int)currentProcessId);
+			return true;
+		}else{
+			NSTask *task = find->second;
+			if([task isRunning])
+			{
+				NSLog(@"%@:%i is running for process:%i", HELPER_NAME, [task processIdentifier], (int)currentProcessId);
+				return true;
+			}else
+			{
+				[task release];
+				task = start_helper(currentProcessId);
+				find->second = task;
+				NSLog(@"%@:%i was relaunched for process:%i", HELPER_NAME, [task processIdentifier], (int)currentProcessId);
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	void exec(ARRAY_TEXT &inObjects,
+						C_LONGINT &inOutputFormat,
+						ARRAY_TEXT &inOptionName,
+						ARRAY_TEXT &inOptionValue,
+						C_BLOB &returnValue)
+	{
+		internal_process_number_t currentProcessId = PA_GetCurrentProcessNumber();
+		
+		if(init())
+		{
+			NSMutableDictionary *userInfo = [[NSMutableDictionary alloc]init];
+			
+			[userInfo setObject:@"run" forKey:@"command"];
+			[userInfo setObject:[NSNumber numberWithInt:(int)currentProcessId] forKey:@"pid"];
+			
+			NSMutableArray *sources = [[NSMutableArray alloc]init];
+			
+			for(NSUInteger i = 0; i < inObjects.getSize(); ++i){
+			
+				NSString *path = inObjects.copyUTF16StringAtIndex(i);
+				
+				if( [path hasPrefix:@"http://"]
+					||[path hasPrefix:@"ftp://"]
+					||[path hasPrefix:@"https://"]
+					||[path hasPrefix:@"file://"]
+					)
+				{
+					NSDictionary *source = [[NSDictionary alloc]initWithObjectsAndKeys:
+					 path, @"data",
+					 @"NO", @"html", nil];
+					[sources addObject:source];
+					[source release];
+				}else{
+					NSString *_path = inObjects.copyPathAtIndex(i);
+					if([[NSFileManager defaultManager]fileExistsAtPath:_path])
+					{
+						NSDictionary *source = [[NSDictionary alloc]initWithObjectsAndKeys:
+																		_path, @"data",
+																		@"NO", @"html",
+																		nil];
+						[sources addObject:source];
+						[source release];
+					}else{
+						NSDictionary *source = [[NSDictionary alloc]initWithObjectsAndKeys:
+																		path, @"data",
+																		@"YES", @"html",
+																		nil];
+						[sources addObject:source];
+						[source release];
+					}
+					[_path release];
+				}
+				[path release];
+			}
+			
+			[userInfo setObject:sources forKey:@"sources"];
+			
+			int outputFormat = inOutputFormat.getIntValue();
+			[userInfo setObject:[NSNumber numberWithInt:outputFormat] forKey:@"fmt"];
+			
+			NSMutableArray *options = [[NSMutableArray alloc]init];
+			
+			size_t countOptions = inOptionName.getSize();
+			if(countOptions == inOptionValue.getSize())
+			{
+				for(int i = 0; i < countOptions; ++i)
+				{
+					NSString *name = inOptionName.copyUTF16StringAtIndex(i);
+					NSString *value = inOptionValue.copyUTF16StringAtIndex(i);
+					NSDictionary *option = [[NSDictionary alloc]initWithObjectsAndKeys:
+																	name, @"name",
+																	value, @"value",
+																	nil];
+					[options addObject:option];
+					[option release];
+					[name release];
+					[value release];
+				}
+			}
+			
+			[userInfo setObject:options forKey:@"options"];
+			
+			CFNotificationCenterPostNotification(center,
+																					 htmltox4d_notification_name,
+																					 NULL,
+																					 (CFDictionaryRef)userInfo,
+																					 true);
+			[options release];
+			[sources release];
+			[userInfo release];
+			
+			PA_FreezeProcess(currentProcessId);
+			
+			std::map<internal_process_number_t, NSData *>::iterator find;
+			find = results.find(currentProcessId);
+			if(find != results.end())
+			{
+				NSData *data = find->second;
+				returnValue.setBytes((const uint8_t *)[data bytes], [data length]);
+			}
+		}
 	}
 }
 
@@ -134,29 +301,41 @@ bool IsProcessOnExit()
 
 void OnStartup()
 {
-	CFNotificationCenterRef center = CFNotificationCenterGetDistributedCenter();
+	HTMLTOX4D::center = CFNotificationCenterGetDistributedCenter();
+	//a distributed notification center delivers notifications between applications
 	
-	if(center)
+	if(HTMLTOX4D::center)
 	{
-		CFNotificationCenterAddObserver(center,
-																		NULL,
-																		notificationCallback,
-																		htmltox_notification_name,
-																		NULL,
-																		CFNotificationSuspensionBehaviorDeliverImmediately);
+		CFNotificationCenterAddObserver(HTMLTOX4D::center,
+																		NULL,	//this parameter may be NULL
+																		HTMLTOX4D::process_notification,
+																		htmltox_notification_name,	//this value must not be NULL
+																		NULL,	//if NULL, callback is called when a notification named name is posted by any object
+																		CFNotificationSuspensionBehaviorDeliverImmediately);	//irst flush any queued notifications
 	}
-	HTMLTOX::clear();
+	
+	NSBundle *bundle = [NSBundle bundleWithIdentifier:this_bundle_id];
+	
+	if(bundle)
+	{
+		HTMLTOX4D::launchPath = [[[bundle executablePath]stringByDeletingLastPathComponent]
+														 stringByAppendingPathComponent:@"wkhtmltox-4d"];
+	}
 }
 
 void OnCloseProcess()
 {
+	HTMLTOX4D::cleanup();
+	
 	if(IsProcessOnExit())
 	{
-		CFNotificationCenterRef center = CFNotificationCenterGetDistributedCenter();
-		
-		if(center)
+		if(HTMLTOX4D::center)
 		{
-			CFNotificationCenterRemoveObserver(center, NULL, htmltox_notification_name, NULL);
+			CFNotificationCenterRemoveObserver(HTMLTOX4D::center,
+																				 NULL,
+																				 htmltox_notification_name,
+																				 NULL);
+			
 		}
 	}
 }
@@ -205,56 +384,6 @@ void CommandDispatcher (PA_long32 pProcNum, sLONG_PTR *pResult, PackagePtr pPara
 
 // ------------------------------------ HTMLTOX -----------------------------------
 
-void setString(NSString* src, CUTF16String &dst)
-{
-	if(src)
-	{
-		uint32_t len = [src length];
-		uint32_t size = (len * sizeof(PA_Unichar)) + sizeof(PA_Unichar);
-		std::vector<uint8_t> buf(size);
-		if([src getCString:(char *)&buf[0] maxLength:size encoding:NSUnicodeStringEncoding])
-		{
-			dst = CUTF16String((const PA_Unichar *)&buf[0], len);
-		}
-	}
-}
-
-void notificationCallback(CFNotificationCenterRef center,
-													void * observer,
-													CFStringRef name,
-													const void * object,
-													CFDictionaryRef userInfo)
-{
-
-	NSString *type = (NSString *)CFDictionaryGetValue(userInfo, CFSTR("type"));
-	int val = [(NSNumber *)CFDictionaryGetValue(userInfo, CFSTR("val")) intValue];
-	int pid = [(NSNumber *)CFDictionaryGetValue(userInfo, CFSTR("pid")) intValue];
-	NSString *str = (NSString *)CFDictionaryGetValue(userInfo, CFSTR("str"));
-	
-	CUTF16String utype, ustr;
-	setString(type, utype);
-	setString(str, ustr);
-
-	if([type isEqualToString:@"progress"])
-	{
-		int progress = HTMLTOX::getProgressForProcess(pid);
-		
-		if(progress < val)
-		{
-			HTMLTOX::append(utype, ustr, val, pid);
-			HTMLTOX::setProgressForProcess(pid, val);
-//			NSLog(@"type:%@ val:%i pid:%i str:%@", type, val, pid, str);
-		}
-	}else if([type isEqualToString:@"info"])
-	{
-//		NSLog(@"type:%@ val:%i pid:%i str:%@", type, val, pid, str);
-	}else
-	{
-		HTMLTOX::append(utype, ustr, val, pid);
-//		NSLog(@"type:%@ val:%i pid:%i str:%@", type, val, pid, str);
-	}
-}
-
 void HTML_Convert(sLONG_PTR *pResult, PackagePtr pParams)
 {
 	ARRAY_TEXT inObjects;
@@ -268,194 +397,7 @@ void HTML_Convert(sLONG_PTR *pResult, PackagePtr pParams)
 	inOptionName.fromParamAtIndex(pParams, 3);
 	inOptionValue.fromParamAtIndex(pParams, 4);
 
-	CUTF16String methodName;
-	int progressId = 0;
-	int currentProcessId = PA_GetCurrentProcessNumber();
-	
-	NSBundle *bundle = [NSBundle bundleWithIdentifier:this_bundle_id];
-	if(bundle)
-	{
-		NSString *currentDirectoryPath = [[bundle executablePath]stringByDeletingLastPathComponent];
-		NSString *launchPath = [currentDirectoryPath stringByAppendingPathComponent:@"wkhtmltox-4d"];
-		
-		NSTask *task = [[NSTask alloc]init];
-		[task setCurrentDirectoryPath:currentDirectoryPath];
-		[task setLaunchPath:launchPath];
-		
-		//options
-		size_t countOptions = inOptionName.getSize();
-		if(countOptions == inOptionValue.getSize())
-		{
-			NSMutableArray *arguments = [[NSMutableArray alloc]init];
-			
-			BOOL isOutputPDF = false;
-			int outputFormat = inOutputFormat.getIntValue();
-			
-			switch (outputFormat)
-			{
-				case HTMLTOX_Format_PDF:
-				case HTMLTOX_Format_PS:
-					isOutputPDF = true;
-					break;
-				case HTMLTOX_Format_PNG:
-				case HTMLTOX_Format_JPG:
-				case HTMLTOX_Format_BMP:
-				case HTMLTOX_Format_SVG:
-					isOutputPDF = false;
-					break;
-				default:
-					outputFormat = HTMLTOX_Format_PDF;
-					isOutputPDF = true;
-					break;
-			};
-			
-			[arguments addObject:@"fmt"];
-			[arguments addObject:[NSString stringWithFormat:@"%i", outputFormat]];
-
-			[arguments addObject:@"pid"];
-			[arguments addObject:[NSString stringWithFormat:@"%i", currentProcessId]];
-			
-			int countPages = inObjects.getSize();
-			
-			if(!isOutputPDF)
-			{
-				countPages = countPages ? 2 : 0;
-			}
-			
-			for(int i = 1; i < countPages; ++i)
-			{
-				CUTF8String htmlObject;
-				inObjects.copyUTF8StringAtIndex(&htmlObject, i);
-				//object can be a url, a path
-				//html source is disabled
-				if(
-					 !((htmlObject.find((const uint8_t *)"http://") == 0)
-					 ||(htmlObject.find((const uint8_t *)"ftp://") == 0)
-					 ||(htmlObject.find((const uint8_t *)"https://") == 0)
-					 ||(htmlObject.find((const uint8_t *)"file://") == 0)
-					 ))
-				{
-					//system path?
-					NSString *str = inObjects.copyUTF16StringAtIndex(i);
-					NSURL *url = (NSURL *)CFURLCreateWithFileSystemPath(kCFAllocatorDefault, (CFStringRef)str, kCFURLHFSPathStyle, false);
-					if(url)
-					{
-						NSString *src = (NSString *)CFURLCopyFileSystemPath((CFURLRef)url, kCFURLPOSIXPathStyle);
-						[arguments addObject:@"src"];
-						[arguments addObject:src];
-						[src release];
-						[url release];
-					}
-					[str release];
-				}else{
-					NSString *src = inObjects.copyUTF16StringAtIndex(i);
-					[arguments addObject:@"src"];
-					[arguments addObject:src];
-					[src release];
-				}
-			}
-			
-			for(int i = 0; i < countOptions; ++i)
-			{
-				CUTF8String optionName, optionValue;
-				inOptionName.copyUTF8StringAtIndex(&optionName, i);
-				inOptionValue.copyUTF8StringAtIndex(&optionValue, i);
-				if(optionName.find((const uint8_t *)"4d.callbackMethodName") == 0)
-				{
-					inOptionValue.copyUTF16StringAtIndex(&methodName, i);
-				}else if(optionName.find((const uint8_t *)"4d.progressId") == 0)
-				{
-					progressId = atoi((const char *)optionValue.c_str());
-				}else
-				{
-					NSString *argName = inOptionName.copyUTF16StringAtIndex(i);
-					NSString *argValue = inOptionValue.copyUTF16StringAtIndex(i);
-					[arguments addObject:@"arg"];
-					[arguments addObject:argName];
-					[arguments addObject:argValue];
-					[argName release];
-					[argValue release];
-				}
-			}
-			//NSLog(@"%@", [arguments description]);
-			[task setArguments:arguments];
-		}
-		
-		NSPipe *pStdOout = [NSPipe pipe];
-		[task setStandardOutput:pStdOout];
-		NSFileHandle *fStdOout = [pStdOout fileHandleForReading];
-		NSMutableData *buf = [[NSMutableData alloc]init];
-		
-		[fStdOout setReadabilityHandler:^(NSFileHandle *file) {
-			[buf appendData:[file availableData]];
-			
-		}];
-
-		HTMLTOX::clear(currentProcessId);	//this will reset the progress too
-		
-		[task launch];
-	
-		PA_long32 methodId = PA_GetMethodID((PA_Unichar *)methodName.c_str());
-		
-		while ([task isRunning]) {
-			
-			PA_YieldAbsolute();
-			
-			std::vector<int>::iterator p = std::find(HTMLTOX::CALLBACK_PARAM_PID.begin(), HTMLTOX::CALLBACK_PARAM_PID.end(), currentProcessId);
-			
-			while (p != HTMLTOX::CALLBACK_PARAM_PID.end())
-			{
-				PA_YieldAbsolute();
-				
-				size_t pos = p - HTMLTOX::CALLBACK_PARAM_PID.begin();
-				CUTF16String type = HTMLTOX::CALLBACK_PARAM_TYPE.at(pos);
-				CUTF16String str = HTMLTOX::CALLBACK_PARAM_STR.at(pos);
-				int val = HTMLTOX::CALLBACK_PARAM_INT.at(pos);
-
-					PA_Variable	params[5];
-					params[0] = PA_CreateVariable(eVK_Longint);
-					params[1] = PA_CreateVariable(eVK_Longint);
-					params[2] = PA_CreateVariable(eVK_Longint);
-					params[3] = PA_CreateVariable(eVK_Unistring);
-					params[4] = PA_CreateVariable(eVK_Unistring);
-					
-					PA_Unistring utype = PA_CreateUnistring((PA_Unichar *)type.c_str());
-					PA_Unistring ustr = PA_CreateUnistring((PA_Unichar *)str.c_str());
-					
-					PA_SetLongintVariable(&params[0], val);
-					PA_SetLongintVariable(&params[1], currentProcessId);
-					PA_SetLongintVariable(&params[2], progressId);
-					PA_SetStringVariable(&params[3], &ustr);
-					PA_SetStringVariable(&params[4], &utype);
-					
-					if(methodId){
-						PA_ExecuteMethodByID(methodId, params, 5);
-					}
-					
-					PA_ClearVariable(&params[0]);
-					PA_ClearVariable(&params[1]);
-					PA_ClearVariable(&params[2]);
-					PA_ClearVariable(&params[3]);
-					PA_ClearVariable(&params[4]);
-
-				p = std::find(++p, HTMLTOX::CALLBACK_PARAM_PID.end(), currentProcessId);
-				
-			}	//while
-			
-			HTMLTOX::erase(currentProcessId);
-			
-		}	//while
-		
-		if([task terminationReason] == NSTaskTerminationReasonExit)
-		{
-				returnValue.addBytes((const uint8_t *)[buf bytes], [buf length]);
-		}
-		
-		HTMLTOX::clear(currentProcessId);	//this will reset the progress too
-		
-		[task release];
-	}	//bundle
+	HTMLTOX4D::exec(inObjects, inOutputFormat, inOptionName, inOptionValue, returnValue);
 	
 	returnValue.setReturn(pResult);
 }
-
