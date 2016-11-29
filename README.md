@@ -23,10 +23,10 @@ document:=HTML Convert (sources;format;optionNames;optionValues)
 
 param|type|description
 ------------|------|----
-sources|ARRAY TEXT|URL (``http:``, ``https:``. ``ftp:``, ``file:``), path or HTML
+sources|ARRAY TEXT|URL (``http:``, ``https:``. ``ftp:``, ``file:``), path, HTML
 format|INT32|``HTMLTOX Format PDF``, ``HTMLTOX Format PS``, ``HTMLTOX Format PNG``, ``HTMLTOX Format JPG``, ``HTMLTOX Format BMP``. ``HTMLTOX Format SVG``
-optionNames|ARRAY TEXT|see (http://wkhtmltopdf.org/libwkhtmltox/)
-optionValues|ARRAY TEXT| see (http://wkhtmltopdf.org/libwkhtmltox/)
+optionNames|ARRAY TEXT|http://wkhtmltopdf.org/libwkhtmltox/
+optionValues|ARRAY TEXT|http://wkhtmltopdf.org/libwkhtmltox/
 document|BLOB|PDF or image
 
 ##New in ``3.0``
