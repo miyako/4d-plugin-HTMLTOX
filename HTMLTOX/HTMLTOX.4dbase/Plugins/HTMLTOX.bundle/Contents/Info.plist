@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>BuildMachineOSBuild</key>
-	<string>15G31</string>
+	<string>15G1108</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
 	<string>HTMLTOX</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.4D.4DPlugin.HTMLTOX-2</string>
+	<string>com.4D.4DPlugin.HTMLTOX-3</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
@@ -21,7 +21,7 @@
 		<string>MacOSX</string>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>14.3</string>
+	<string>15</string>
 	<key>CSResourcesFileMapped</key>
 	<true/>
 	<key>DTCompiler</key>
@@ -38,5 +38,7 @@
 	<string>0701</string>
 	<key>DTXcodeBuild</key>
 	<string>7A1001</string>
+	<key>LSBackgroundOnly</key>
+	<true/>
 </dict>
 </plist>

@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.4D.4DPlugin.HTMLTOX-2</string>
+	<string>com.4D.4DPlugin.HTMLTOX-3</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
@@ -15,8 +15,10 @@
 	<key>CFBundleSignature</key>
 	<string>4D06</string>
 	<key>CFBundleVersion</key>
-	<string>14.3</string>
+	<string>15</string>
 	<key>CSResourcesFileMapped</key>
+	<true/>
+	<key>LSBackgroundOnly</key>
 	<true/>
 </dict>
 </plist>

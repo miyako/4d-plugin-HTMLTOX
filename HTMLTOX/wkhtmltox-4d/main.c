@@ -1,67 +1,43 @@
 #include <stdio.h>
+
 #include <CoreFoundation/CoreFoundation.h>
+
 #include <wkhtmltox/pdf.h>
 #include <wkhtmltox/image.h>
+
 #include <string>
 #include <vector>
+
 #include "wkhtmltox_4d.h"
 
 int pid = 0;
+
+int process_4d = 0;
+int process_os = 0;
+
 void status(CFStringRef status);
-
-#pragma mark -
-
-//void post_notification(CFNotificationCenterRef center, const char *type, const int val, const SInt32 pid, const char *str);
-//
-//#pragma mark callback function
-//
-//void pdf_progress_cb(wkhtmltopdf_converter * converter, const int val)
-//{
-//	post_notification(CFNotificationCenterGetDistributedCenter(), "progress", val, pid, "");
-//}
-//void pdf_warning_cb(wkhtmltopdf_converter * converter, const char * str)
-//{
-//	post_notification(CFNotificationCenterGetDistributedCenter(), "warning", 0, pid, str);
-//}
-//void pdf_error_cb(wkhtmltopdf_converter * converter, const char * str)
-//{
-//	post_notification(CFNotificationCenterGetDistributedCenter(), "error", 0, pid, str);
-//}
-//void pdf_finished_cb(wkhtmltopdf_converter * converter, const int val)
-//{
-//	post_notification(CFNotificationCenterGetDistributedCenter(), "finished", val, pid, "");
-//}
-//
-//#pragma mark -
-//
-//void image_progress_cb(wkhtmltoimage_converter * converter, const int val)
-//{
-//	post_notification(CFNotificationCenterGetDistributedCenter(), "progress", val, pid, "");
-//}
-//void image_warning_cb(wkhtmltoimage_converter * converter, const char * str)
-//{
-//	post_notification(CFNotificationCenterGetDistributedCenter(), "warning", 0, pid, str);
-//}
-//void image_error_cb(wkhtmltoimage_converter * converter, const char * str)
-//{
-//	post_notification(CFNotificationCenterGetDistributedCenter(), "error", 0, pid, str);
-//}
-//void image_finished_cb(wkhtmltoimage_converter * converter, const int val)
-//{
-//	post_notification(CFNotificationCenterGetDistributedCenter(), "finished", val, pid, "");
-//}
 
 #pragma mark -
 
 Boolean my_process(CFDictionaryRef userInfo)
 {
-	if(CFDictionaryContainsKey(userInfo, USERINFOKEY_PID))
+	if(CFDictionaryContainsKey(userInfo, USERINFOKEY_PID)
+		 && CFDictionaryContainsKey(userInfo, USERINFOKEY_PID_OS))
 	{
-		int local_pid = 0;
-		CFNumberRef remote_pid = (CFNumberRef)CFDictionaryGetValue(userInfo, USERINFOKEY_PID);
-		if(CFNumberGetValue(remote_pid, kCFNumberIntType, &local_pid))
+		int process_4d_i = 0, process_os_i = 0;
+		CFNumberRef process_4d_n, process_os_n;
+		
+		process_4d_n = (CFNumberRef)CFDictionaryGetValue(userInfo, USERINFOKEY_PID);
+		if(CFNumberGetValue(process_4d_n, kCFNumberIntType, &process_4d_i))
 		{
-			return (local_pid == pid);
+			if(process_4d_i == process_4d)
+			{
+				process_os_n = (CFNumberRef)CFDictionaryGetValue(userInfo, USERINFOKEY_PID_OS);
+				if(CFNumberGetValue(process_os_n, kCFNumberIntType, &process_os_i))
+				{
+					return (process_os_i == process_os);
+				}
+			}
 		}
 	}
 	return false;
@@ -311,15 +287,18 @@ void process_notification(CFNotificationCenterRef center,
 				wkhtmltopdf_destroy_global_settings(pdf_global_settings);
 			}
 			
-			CFNumberRef local_pid = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &pid);
-			CFDictionarySetValue(dict, USERINFOKEY_PID, local_pid);
+			CFNumberRef process_4d_n = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &process_4d);
+			CFNumberRef process_os_n = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &process_os);
 			
-
+			CFDictionarySetValue(dict, USERINFOKEY_PID, process_4d_n);
+			CFDictionarySetValue(dict, USERINFOKEY_PID_OS, process_os_n);
+			
 			CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(),
 																					 htmltox_notification_name,
 																					 NULL, dict, true);
 			
-			CFRelease(local_pid);
+			CFRelease(process_os_n);
+			CFRelease(process_4d_n);
 			CFRelease(dict);
 		}
 	}
@@ -331,15 +310,19 @@ void status(CFStringRef status)
 																													&kCFTypeDictionaryKeyCallBacks,
 																													&kCFTypeDictionaryValueCallBacks);
 	
-	CFNumberRef local_pid = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &pid);
-	CFDictionarySetValue(dict, USERINFOKEY_PID, local_pid);
+	CFNumberRef process_4d_n = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &process_4d);
+	CFNumberRef process_os_n = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &process_os);
+	
+	CFDictionarySetValue(dict, USERINFOKEY_PID, process_4d_n);
+	CFDictionarySetValue(dict, USERINFOKEY_PID_OS, process_os_n);
 	CFDictionarySetValue(dict, USERINFOKEY_STATUS, status);
 	
 	CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(),
 																			 htmltox_notification_name,
 																			 NULL, dict, true);
 	
-	CFRelease(local_pid);
+	CFRelease(process_os_n);
+	CFRelease(process_4d_n);
 	CFRelease(dict);
 }
 
@@ -371,13 +354,16 @@ int main(int argc, const char * argv[])
 {
 	for(unsigned int i=1; i<(argc-1); ++i)
 	{
-		 if(!strcmp("pid", argv[i])){
-			pid = atoi(argv[i+1]);
-			break;
+		if(!strcmp("pid", argv[i]))
+		{
+			process_4d = atoi(argv[i+1]);
+		}else if(!strcmp("pidos", argv[i]))
+		{
+			process_os = atoi(argv[i+1]);
 		}
 	}
 	
-	if(pid)
+	if((process_4d) && (process_os))
 	{
 		wkhtmltopdf_init(0);
 	

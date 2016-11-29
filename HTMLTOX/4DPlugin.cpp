@@ -24,6 +24,8 @@ namespace HTMLTOX4D
 	typedef PA_long32 internal_process_number_t;
 	typedef int external_process_number_t;
 	
+	external_process_number_t process_os;
+	
 	std::map<internal_process_number_t, NSTask *> processes;
 	std::map<internal_process_number_t, NSData *> results;
 	
@@ -55,6 +57,7 @@ namespace HTMLTOX4D
 				
 				[userInfo setObject:@"terminate" forKey:@"command"];
 				[userInfo setObject:[NSNumber numberWithInt:(int)pid] forKey:@"pid"];
+				[userInfo setObject:[NSNumber numberWithInt:(int)HTMLTOX4D::process_os] forKey:@"pidos"];
 				
 				CFNotificationCenterPostNotification(center,
 																						 htmltox4d_notification_name,
@@ -94,26 +97,36 @@ namespace HTMLTOX4D
 	
 	void set_data(CFDictionaryRef userInfo)
 	{
-		if(CFDictionaryContainsKey(userInfo, USERINFOKEY_PID))
+		if(CFDictionaryContainsKey(userInfo, USERINFOKEY_PID)
+			 && CFDictionaryContainsKey(userInfo, USERINFOKEY_PID_OS))
 		{
-			int local_pid = 0;
-			CFNumberRef remote_pid = (CFNumberRef)CFDictionaryGetValue(userInfo, USERINFOKEY_PID);
-			if(CFNumberGetValue(remote_pid, kCFNumberIntType, &local_pid))
+			int process_4d_i = 0, process_os_i = 0;
+			CFNumberRef process_4d_n, process_os_n;
+			
+			process_4d_n = (CFNumberRef)CFDictionaryGetValue(userInfo, USERINFOKEY_PID);
+			if(CFNumberGetValue(process_4d_n, kCFNumberIntType, &process_4d_i))
 			{
-				if(CFDictionaryContainsKey(userInfo, USERINFOKEY_DATA))
+				process_os_n = (CFNumberRef)CFDictionaryGetValue(userInfo, USERINFOKEY_PID_OS);
+				if(CFNumberGetValue(process_os_n, kCFNumberIntType, &process_os_i))
 				{
-					std::map<internal_process_number_t, NSData *>::iterator find;
-					find = results.find(local_pid);
-					if(find == results.end())
+					if(process_os_i == HTMLTOX4D::process_os)
 					{
-						NSData *data = [[NSData alloc]initWithData:(NSData *)CFDictionaryGetValue(userInfo, USERINFOKEY_DATA)];
-						results.insert(std::pair<internal_process_number_t, NSData *>(local_pid, data));
-					}else{
-						NSData *data = find->second;
-						[data release];
-						find->second = [[NSData alloc]initWithData:(NSData *)CFDictionaryGetValue(userInfo, USERINFOKEY_DATA)];
+						if(CFDictionaryContainsKey(userInfo, USERINFOKEY_DATA))
+						{
+							std::map<internal_process_number_t, NSData *>::iterator find;
+							find = results.find(process_4d_i);
+							if(find == results.end())
+							{
+								NSData *data = [[NSData alloc]initWithData:(NSData *)CFDictionaryGetValue(userInfo, USERINFOKEY_DATA)];
+								results.insert(std::pair<internal_process_number_t, NSData *>(process_4d_i, data));
+							}else{
+								NSData *data = find->second;
+								[data release];
+								find->second = [[NSData alloc]initWithData:(NSData *)CFDictionaryGetValue(userInfo, USERINFOKEY_DATA)];
+							}
+						}
 					}
-				}
+				}	
 			}
 		}
 	}
@@ -142,6 +155,8 @@ namespace HTMLTOX4D
 		NSMutableArray *arguments = [[NSMutableArray alloc]init];
 		[arguments addObject:@"pid"];
 		[arguments addObject:[NSString stringWithFormat:@"%i", (int)currentProcessId]];
+		[arguments addObject:@"pidos"];
+		[arguments addObject:[NSString stringWithFormat:@"%i", (int)HTMLTOX4D::process_os]];
 		[task setArguments:arguments];
 		[arguments release];
 		
@@ -197,6 +212,7 @@ namespace HTMLTOX4D
 			
 			[userInfo setObject:@"run" forKey:@"command"];
 			[userInfo setObject:[NSNumber numberWithInt:(int)currentProcessId] forKey:@"pid"];
+			[userInfo setObject:[NSNumber numberWithInt:(int)HTMLTOX4D::process_os] forKey:@"pidos"];
 			
 			NSMutableArray *sources = [[NSMutableArray alloc]init];
 			
@@ -301,6 +317,7 @@ bool IsProcessOnExit()
 
 void OnStartup()
 {
+	HTMLTOX4D::process_os = [[NSRunningApplication currentApplication]processIdentifier];
 	HTMLTOX4D::center = CFNotificationCenterGetDistributedCenter();
 	//a distributed notification center delivers notifications between applications
 	
