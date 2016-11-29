@@ -1,7 +1,35 @@
-# 4d-plugin-HTMLTOX
+4d-plugin-HTMLTOX
+=================
+
 4D implementation of wkhtmltopdf. 
 
-##New
+###Platform
+
+| carbon | cocoa | win32 | win64 |
+|:------:|:-----:|:---------:|:---------:|
+|🆗|🆗|🚫|🚫|
+
+###Version
+
+<img src="https://cloud.githubusercontent.com/assets/1725068/18940649/21945000-8645-11e6-86ed-4a0f800e5a73.png" width="32" height="32" /> <img src="https://cloud.githubusercontent.com/assets/1725068/18940648/2192ddba-8645-11e6-864d-6d5692d55717.png" width="32" height="32" />
+
+Based on [wkhtmltopdf 0.12.2.3](http://wkhtmltopdf.org/).
+
+###Syntax
+
+```
+document:=HTML Convert (sources;format;optionNames;optionValues)
+```
+
+param|type|description
+------------|------|----
+sources|ARRAY TEXT|URL (``http:``, ``https:``. ``ftp:``, ``file:``), path or HTML
+format|INT32|``HTMLTOX Format PDF``, ``HTMLTOX Format PS``, ``HTMLTOX Format PNG``, ``HTMLTOX Format JPG``, ``HTMLTOX Format BMP``. ``HTMLTOX Format SVG``
+optionNames|ARRAY TEXT|see (http://wkhtmltopdf.org/libwkhtmltox/)
+optionValues|ARRAY TEXT| see (http://wkhtmltopdf.org/libwkhtmltox/)
+document|BLOB|PDF or image
+
+##New in ``3.0``
 
 Callback feature is deprecated. 
 
@@ -12,23 +40,6 @@ The helper app is launched per process and stays running for the lifetime of tha
 ``libwkhtmltox`` is no longer linked as a dylib; instead, a command line program is invoked internally.
 
 **TODO**: ~~Check caller process ID so that multiple instances of 4D can use the plugin.~~ done in ``3.0``
-
-##Platform
-
-| carbon | cocoa | win32 | win64 |
-|:------:|:-----:|:---------:|:---------:|
-|🆗|🆗|🚫|🚫|
-
-About
----
-Based on [wkhtmltopdf 0.12.2.3](http://wkhtmltopdf.org/).
-
-Commands
----
-
-```c
-HTML Convert
-```
 
 Examples
 ---
@@ -102,79 +113,4 @@ $resultBlob:=HTML Convert ($html;HTMLTOX Format JPG;$optionKeys;$optionValues)
 $path:=Temporary folder+Generate UUID+".jpg"
 BLOB TO DOCUMENT($path;$resultBlob)
 OPEN URL($path)
-```
-
-* With callback (deprecated)
-
-```
-C_LONGINT($1;$intValue)  //for progress, finished
-C_LONGINT($2;$processNumber)  //the process that started the conversion; the library itself is running in the main thread
-C_LONGINT($3;$progressId)  //if 4d.progressId is passed
-C_TEXT($4;$stringValue)  //for warning, error
-C_TEXT($5;$callbackType)  //one of the following: progress, warning, error, finished
-
-$intValue:=$1
-$processNumber:=$2
-$progressId:=$3
-$stringValue:=$4
-$callbackType:=$5
-
-Case of 
-	: ($callbackType="progress")
-		
-		Progress SET PROGRESS ($progressId;$intValue/100)
-		
-	: ($callbackType="finished")
-		
-		If ($intValue=1)
-			Progress SET MESSAGE ($progressId;"complete!")
-		End if 
-		
-	: ($callbackType="warning")
-		
-	: ($callbackType="error")
-		
-End case 
-```
-
-* Callback (deprecated)
-
-```
-ARRAY TEXT($optionKeys;0)
-ARRAY TEXT($optionValues;0)
-
-$progressId:=Progress New 
-Progress SET PROGRESS ($progressId;0)
-
-ARRAY TEXT($html;3)
-$html{1}:=Get 4D folder(Current resources folder)+"sample1.html"
-$html{2}:=Get 4D folder(Current resources folder)+"sample1.html"
-$html{3}:=Get 4D folder(Current resources folder)+"sample1.html"
-
-  //global
-APPEND TO ARRAY($optionKeys;"size.paperSize")
-APPEND TO ARRAY($optionValues;"A4")
-APPEND TO ARRAY($optionKeys;"orientation")
-APPEND TO ARRAY($optionValues;"Landscape")
-
-  //special options for 4d
-APPEND TO ARRAY($optionKeys;"4d.progressId")
-APPEND TO ARRAY($optionValues;String($progressId))
-
-APPEND TO ARRAY($optionKeys;"4d.callbackMethodName")
-APPEND TO ARRAY($optionValues;"HTMLTOX_CALLBACK")
-
-$resultBlob:=HTML Convert ($html;HTMLTOX Format PDF;$optionKeys;$optionValues)
-
-Progress QUIT ($progressId)
-
-If (BLOB size($resultBlob)#0)
-	
-	$dstPath:=Temporary folder+Generate UUID+".pdf"
-	
-	BLOB TO DOCUMENT($dstPath;$resultBlob)
-	
-	OPEN URL($dstPath)
-	
-End if 
 ```
