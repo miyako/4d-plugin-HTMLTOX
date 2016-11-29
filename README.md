@@ -27,7 +27,7 @@ Commands
 ---
 
 ```c
-HTML_Convert
+HTML Convert
 ```
 
 Examples
