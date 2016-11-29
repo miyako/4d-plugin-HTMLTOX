@@ -18,7 +18,7 @@ Based on [wkhtmltopdf 0.12.2.3](http://wkhtmltopdf.org/).
 ###Syntax
 
 ```
-document:=HTML Convert (sources;format;optionNames;optionValues)
+document:=HTML Convert(sources;format;optionNames;optionValues)
 ```
 
 param|type|description
