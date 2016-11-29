@@ -21,8 +21,8 @@ Based on [wkhtmltopdf 0.12.2.3](http://wkhtmltopdf.org/).
 document:=HTML Convert (sources;format;optionNames;optionValues)
 ```
 
-param|  type  |description
-------------|------|----
+param|type|description
+------------|------------|----
 sources|ARRAY TEXT|URL (``http:``, ``https:``. ``ftp:``, ``file:``), path, HTML
 format|INT32|``HTMLTOX Format PDF``, ``HTMLTOX Format PS``, ``HTMLTOX Format PNG``, ``HTMLTOX Format JPG``, ``HTMLTOX Format BMP``. ``HTMLTOX Format SVG``
 optionNames|ARRAY TEXT|http://wkhtmltopdf.org/libwkhtmltox/
