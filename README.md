@@ -1,12 +1,6 @@
 # 4d-plugin-HTMLTOX
 4D implementation of wkhtmltopdf. 
 
-##Releases
-
-[64 bit bundle for 4D v15 and later](https://github.com/miyako/4d-plugin-HTMLTOX/releases/tag/2.0.64)
-
-[32/64 bit bundle for 4D v15 and later](https://github.com/miyako/4d-plugin-HTMLTOX/releases/tag/2.0.32)
-
 ##New
 
 Callback feature is deprecated. 
