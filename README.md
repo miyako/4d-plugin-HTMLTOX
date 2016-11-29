@@ -41,8 +41,7 @@ The helper app is launched per process and stays running for the lifetime of tha
 
 **TODO**: ~~Check caller process ID so that multiple instances of 4D can use the plugin.~~ done in ``3.0``
 
-Examples
----
+###Examples
 
 * HTML to PDF
 
