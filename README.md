@@ -29,7 +29,7 @@ optionNames|ARRAY TEXT|http://wkhtmltopdf.org/libwkhtmltox/
 optionValues|ARRAY TEXT|http://wkhtmltopdf.org/libwkhtmltox/
 document|BLOB|PDF or image
 
-##New in ``3.0``
+###New in 3.0
 
 Callback feature is deprecated. 
 
