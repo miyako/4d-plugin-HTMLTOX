@@ -51,7 +51,7 @@ NSArray *copySources(ARRAY_TEXT &inObjects)
 			}else{
 			//the sources is html
 				NSDictionary *item = [[NSDictionary alloc]initWithObjectsAndKeys:
-																path, @"data",
+																source, @"data",
 																@"html", @"type",
 																nil];
 				[sources addObject:item];
