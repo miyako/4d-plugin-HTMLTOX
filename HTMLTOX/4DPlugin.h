@@ -12,9 +12,3 @@
 
 // --- HTMLTOX
 void HTML_Convert(sLONG_PTR *pResult, PackagePtr pParams);
-
-void notificationCallback(CFNotificationCenterRef center,
-													void * observer,
-													CFStringRef name,
-													const void * object,
-													CFDictionaryRef userInfo);

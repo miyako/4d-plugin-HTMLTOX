@@ -100,7 +100,7 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			X0nN/vVEKGfJf5KsX9i8pAqwDyk=
+			hy9ma1pfJOfNiU2XvIKRCiI3Vxo=
 			</data>
 			<key>optional</key>
 			<true/>
@@ -134,7 +134,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			CxCL0N4jKB6TdQCg78z1DmRQYcE=
+			9ubzuBbzdtSc83S6UT8zA20ZyWY=
 			</data>
 			<key>requirement</key>
 			<string>anchor apple generic and identifier "wkhtmltox-4d" and (certificate leaf[field.1.2.840.113635.100.6.1.9] /* exists */ or certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = Y69CWUC25B)</string>
@@ -407,11 +407,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			X0nN/vVEKGfJf5KsX9i8pAqwDyk=
+			hy9ma1pfJOfNiU2XvIKRCiI3Vxo=
 			</data>
 			<key>hash2</key>
 			<data>
-			KW2iQaBh/bjqVNTSn68A9U/h8kYP5aHX+f8dqs4sYC0=
+			0LLohEuws+DLx+BpsjKyuOCfNFPU233pUS6vQEadO+Q=
 			</data>
 			<key>optional</key>
 			<true/>

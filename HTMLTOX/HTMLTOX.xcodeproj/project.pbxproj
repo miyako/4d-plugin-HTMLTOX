@@ -54,7 +54,7 @@
 		D134D4AC1A030BA0008D14EF /* manifest.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = D134D4A91A030B06008D14EF /* manifest.json */; };
 		D168FD041DE2D103008B27DC /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = D168FD031DE2D103008B27DC /* main.c */; };
 		D168FD0A1DE2DF66008B27DC /* libwkhtmltox.0.12.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D168FD091DE2DF66008B27DC /* libwkhtmltox.0.12.3.dylib */; };
-		D168FD0C1DE2DF77008B27DC /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D168FD0B1DE2DF77008B27DC /* CoreFoundation.framework */; };
+		D16E9C341DF167C500725A87 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D16E9C331DF167C500725A87 /* Foundation.framework */; };
 		D175D9CD1A02E8DD0006B569 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D175D9CC1A02E8DD0006B569 /* CoreGraphics.framework */; };
 /* End PBXBuildFile section */
 
@@ -134,6 +134,7 @@
 		D168FD091DE2DF66008B27DC /* libwkhtmltox.0.12.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libwkhtmltox.0.12.3.dylib; path = HTMLTOX.4dbase/Plugins/HTMLTOX.bundle/Contents/MacOS/libwkhtmltox.0.12.3.dylib; sourceTree = "<group>"; };
 		D168FD0B1DE2DF77008B27DC /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		D168FD0D1DE2E2DC008B27DC /* wkhtmltox_4d.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wkhtmltox_4d.h; sourceTree = "<group>"; };
+		D16E9C331DF167C500725A87 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		D175D9CC1A02E8DD0006B569 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -152,7 +153,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D168FD0C1DE2DF77008B27DC /* CoreFoundation.framework in Frameworks */,
+				D16E9C341DF167C500725A87 /* Foundation.framework in Frameworks */,
 				D168FD0A1DE2DF66008B27DC /* libwkhtmltox.0.12.3.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -176,6 +177,7 @@
 		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				D16E9C331DF167C500725A87 /* Foundation.framework */,
 				D168FD0B1DE2DF77008B27DC /* CoreFoundation.framework */,
 				D168FD091DE2DF66008B27DC /* libwkhtmltox.0.12.3.dylib */,
 				D13116C61A03B5B600DE1322 /* AppKit.framework */,
@@ -637,7 +639,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CLANG_LINK_OBJC_RUNTIME = NO;
@@ -684,7 +686,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CLANG_LINK_OBJC_RUNTIME = NO;
@@ -724,7 +726,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CLANG_LINK_OBJC_RUNTIME = NO;

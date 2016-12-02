@@ -1,382 +1,270 @@
-#include <stdio.h>
+#import <Foundation/Foundation.h>
+#import <wkhtmltox/pdf.h>
+#import <wkhtmltox/image.h>
+#import "wkhtmltox_4d.h"
+#import <vector>
 
-#include <CoreFoundation/CoreFoundation.h>
+@implementation HTMLTOX : NSObject
 
-#include <wkhtmltox/pdf.h>
-#include <wkhtmltox/image.h>
-
-#include <string>
-#include <vector>
-
-#include "wkhtmltox_4d.h"
-
-int pid = 0;
-
-int process_4d = 0;
-int process_os = 0;
-
-void status(CFStringRef status);
-
-#pragma mark -
-
-Boolean my_process(CFDictionaryRef userInfo)
+- (NSData *)doIt:(NSArray *)sources
+					format:(NSNumber *)format
+				 options:(NSArray *)options
 {
-	if(CFDictionaryContainsKey(userInfo, USERINFOKEY_PID)
-		 && CFDictionaryContainsKey(userInfo, USERINFOKEY_PID_OS))
+//	NSLog(@"got message: %@\n", @"doIt");
+
+	NSLog(@"format: %i\n", (int)[format intValue]);
+	
+	switch ([format intValue])
 	{
-		int process_4d_i = 0, process_os_i = 0;
-		CFNumberRef process_4d_n, process_os_n;
-		
-		process_4d_n = (CFNumberRef)CFDictionaryGetValue(userInfo, USERINFOKEY_PID);
-		if(CFNumberGetValue(process_4d_n, kCFNumberIntType, &process_4d_i))
+		case HTMLTOX_Format_PNG:
+		case HTMLTOX_Format_JPG:
+		case HTMLTOX_Format_BMP:
+		case HTMLTOX_Format_SVG:
+			return [self processImage:sources format:format options:options];
+			break;
+		default:
+			return [self processPDF:sources format:format options:options];
+			break;
+	};
+}
+
+- (void)quit
+{
+//	NSLog(@"got message: %@\n", @"quit");
+	CFRunLoopStop(CFRunLoopGetCurrent());
+}
+
+- (NSData *)processPDF:(NSArray *)sources
+								format:(NSNumber *)format
+							 options:(NSArray *)options
+{
+	NSData *pdf = [NSData data];
+	
+	NSLog(@"global options: %@\n", [options description]);
+	NSLog(@"sources: %@\n", [sources description]);
+	
+	wkhtmltopdf_global_settings *pdf_global_settings = wkhtmltopdf_create_global_settings();
+	
+	switch ([format intValue])
+	{
+		case HTMLTOX_Format_PS:
+			wkhtmltopdf_set_global_setting(pdf_global_settings, "outputFormat", "ps");
+			break;
+		default:
+			wkhtmltopdf_set_global_setting(pdf_global_settings, "outputFormat", "pdf");
+			break;
+	};
+	
+	std::vector<wkhtmltopdf_object_settings *>object_settings;
+	
+	wkhtmltopdf_converter *pdf_converter = wkhtmltopdf_create_converter(pdf_global_settings);
+	
+	/* global options */
+	
+	for(NSUInteger i = 0; i < [options count]; ++i)
+	{
+		NSDictionary *option = [options objectAtIndex:i];
+		if(option)
 		{
-			if(process_4d_i == process_4d)
+			NSString *name = [option valueForKey:@"name"];
+			NSString *value = [option valueForKey:@"value"];
+			if((name) && (value) && [name length] && [value length])
 			{
-				process_os_n = (CFNumberRef)CFDictionaryGetValue(userInfo, USERINFOKEY_PID_OS);
-				if(CFNumberGetValue(process_os_n, kCFNumberIntType, &process_os_i))
+				NSArray *components = [name componentsSeparatedByString:@":"];
+				if([components count] == 1)
 				{
-					return (process_os_i == process_os);
+					wkhtmltopdf_set_global_setting(pdf_global_settings, [name UTF8String], [value UTF8String]);
+					NSLog(@"global option: %@, %@\n", name, value);
 				}
 			}
 		}
 	}
-	return false;
-}
-
-Boolean my_command(CFDictionaryRef userInfo, CFStringRef value)
-{
-	if(CFDictionaryContainsKey(userInfo, USERINFOKEY_COMMAND))
+	
+	for(NSUInteger i = 0; i < [sources count]; ++i)
 	{
-		CFStringRef keyValue = (CFStringRef)CFDictionaryGetValue(userInfo, USERINFOKEY_COMMAND);
-		return (kCFCompareEqualTo == CFStringCompare(keyValue, value, kCFCompareCaseInsensitive));
-	}
-	return false;
-}
-
-#pragma mark -
-
-void process_notification(CFNotificationCenterRef center,
-													void *observer,
-													CFStringRef name,
-													const void *object,
-													CFDictionaryRef userInfo)
-{
-	if(my_process(userInfo))
-	{
-		if(my_command(userInfo, CFSTR("terminate")))
+		NSDictionary *source = [sources objectAtIndex:i];
+		if(source)
 		{
-			
-			CFRunLoopStop(CFRunLoopGetCurrent());	//exit CFRunLoopRun
-			
-		}else if(my_command(userInfo, CFSTR("run")))
-		{
-			CFMutableDictionaryRef dict = CFDictionaryCreateMutable(kCFAllocatorDefault, 0,
-																															&kCFTypeDictionaryKeyCallBacks,
-																															&kCFTypeDictionaryValueCallBacks);
-			
-			CFArrayRef options = 0;
-			CFArrayRef sources = 0;
-			
-			/* format */
-			
-			int fmt = HTMLTOX_Format_PDF;
-			Boolean isOutputPDF = true;
-			if(CFDictionaryContainsKey(userInfo, USERINFOKEY_FORMAT))
+			NSString *data = [source valueForKey:@"data"];
+			NSString *type = [source valueForKey:@"type"];
+			if((data) && (type) && [data length] && [type length])
 			{
-				CFNumberRef format = (CFNumberRef)CFDictionaryGetValue(userInfo, USERINFOKEY_FORMAT);
-				CFNumberGetValue(format, kCFNumberIntType, &fmt);
-			}
-			switch (fmt)
-			{
-				case HTMLTOX_Format_PNG:
-				case HTMLTOX_Format_JPG:
-				case HTMLTOX_Format_BMP:
-				case HTMLTOX_Format_SVG:
-					isOutputPDF = false;
-					break;
-			};
-			
-			wkhtmltopdf_global_settings *pdf_global_settings = 0;
-			wkhtmltoimage_global_settings *image_global_settings = 0;
-			if(isOutputPDF)
-			{
-				pdf_global_settings = wkhtmltopdf_create_global_settings();
-				switch (fmt)
-				{
-					case HTMLTOX_Format_PDF:
-						wkhtmltopdf_set_global_setting(pdf_global_settings, "outputFormat", "pdf");
-						break;
-					case HTMLTOX_Format_PS:
-						wkhtmltopdf_set_global_setting(pdf_global_settings, "outputFormat", "ps");
-						break;
-					default:
-						break;
-				};
-			}else
-			{
-				image_global_settings = wkhtmltoimage_create_global_settings();
+				wkhtmltopdf_object_settings *pdf_object_settings = wkhtmltopdf_create_object_settings();
+				object_settings.push_back(pdf_object_settings);
 				
-				switch (fmt)
+				//check for per-source option
+				for(NSUInteger j = 0; j < [options count]; ++j)
 				{
-					case HTMLTOX_Format_PNG:
-						wkhtmltoimage_set_global_setting(image_global_settings, "fmt", "png");
-						break;
-					case HTMLTOX_Format_JPG:
-						wkhtmltoimage_set_global_setting(image_global_settings, "fmt", "jpg");
-						break;
-					case HTMLTOX_Format_BMP:
-						wkhtmltoimage_set_global_setting(image_global_settings, "fmt", "bmp");
-						break;
-					case HTMLTOX_Format_SVG:
-						wkhtmltoimage_set_global_setting(image_global_settings, "fmt", "svg");
-						break;
-					default:
-						break;
-				};
-			}
-			
-			/* object settings */
-			std::vector<wkhtmltopdf_object_settings *>object_settings;
-			
-			/* converter */
-			
-			wkhtmltopdf_converter *pdf_converter = 0;
-			wkhtmltoimage_converter *image_converter = 0;
-			
-			if(isOutputPDF)
-			{
-				pdf_converter = wkhtmltopdf_create_converter(pdf_global_settings);
-			}
-			
-			if(CFDictionaryContainsKey(userInfo, USERINFOKEY_SOURCES))
-			{
-				sources = (CFArrayRef)CFDictionaryGetValue(userInfo, USERINFOKEY_SOURCES);
-				
-				if(CFDictionaryContainsKey(userInfo, USERINFOKEY_OPTIONS))
-				{
-					options = (CFArrayRef)CFDictionaryGetValue(userInfo, USERINFOKEY_OPTIONS);
-					
-					/* global settings */
-					
-					for(CFIndex i = 1; i < CFArrayGetCount(options); ++i)
+					NSDictionary *option = [options objectAtIndex:j];
+					if(option)
 					{
-						CFDictionaryRef option = (CFDictionaryRef)CFArrayGetValueAtIndex(options, i);
-						CFStringRef name = (CFStringRef)CFDictionaryGetValue(option, CFSTR("name"));
-						CFStringRef value = (CFStringRef)CFDictionaryGetValue(option, CFSTR("value"));
-						const char *_name = CFStringGetCStringPtr(name, kCFStringEncodingUTF8);
-						const char *_value = CFStringGetCStringPtr(value, kCFStringEncodingUTF8);
-						
-						if(_name && _value)
+						NSString *name = [option valueForKey:@"name"];
+						NSString *value = [option valueForKey:@"value"];
+						if((name) && (value) && [name length] && [value length])
 						{
-							CFRange range =CFStringFind(name, CFSTR(":"), 0);
-							if(range.location == kCFNotFound)
+							NSArray *components = [name componentsSeparatedByString:@":"];
+							if([components count] == 2)
 							{
-								if(isOutputPDF)
+								NSString *page = [components objectAtIndex:0];
+								if([page intValue] == (i + 1))
 								{
-									wkhtmltopdf_set_global_setting(pdf_global_settings, _name, _value);
-								}else
-								{
-									wkhtmltoimage_set_global_setting(image_global_settings, _name, _value);
+									name = [components objectAtIndex:1];
+									wkhtmltopdf_set_object_setting(pdf_object_settings, [name UTF8String], [value UTF8String]);
+									NSLog(@"object option: %@, %@, %@\n", page, name, value);
 								}
 							}
 						}
 					}
-					
-					for(CFIndex i = 1; i < CFArrayGetCount(sources); ++i)
-					{
-						CFDictionaryRef source = (CFDictionaryRef)CFArrayGetValueAtIndex(sources, i);
-						CFStringRef path = (CFStringRef)CFDictionaryGetValue(source, CFSTR("data"));
-						CFStringRef html = (CFStringRef)CFDictionaryGetValue(source, CFSTR("html"));
-						const char *src = CFStringGetCStringPtr(path, kCFStringEncodingUTF8);
-						
-						if(isOutputPDF)
-						{
-							wkhtmltopdf_object_settings *pdf_object_settings = wkhtmltopdf_create_object_settings();
-							object_settings.push_back(pdf_object_settings);
-							
-							for(CFIndex j = 1; j < CFArrayGetCount(options); ++j)
-							{
-								CFDictionaryRef option = (CFDictionaryRef)CFArrayGetValueAtIndex(options, j);
-								CFStringRef name = (CFStringRef)CFDictionaryGetValue(option, CFSTR("name"));
-								CFStringRef value = (CFStringRef)CFDictionaryGetValue(option, CFSTR("value"));
-								
-								CFRange range =CFStringFind(name, CFSTR(":"), 0);
-								if(range.location != kCFNotFound)
-								{
-									CFStringRef __name = CFStringCreateWithSubstring(kCFAllocatorDefault, name, CFRangeMake(range.location+1, CFStringGetLength(name) - range.location+1));
-									if(name)
-									{
-										const char *_name = CFStringGetCStringPtr(__name, kCFStringEncodingUTF8);
-										const char *_value = CFStringGetCStringPtr(value, kCFStringEncodingUTF8);
-										if(_name && _value)
-										{
-											wkhtmltopdf_set_object_setting(pdf_object_settings, _name, _value);
-										}
-										CFRelease(__name);
-									}
-								}
-								
-							}//options
-							
-							if(src)
-							{
-								if(kCFCompareEqualTo == CFStringCompare(html, CFSTR("YES"), kCFCompareCaseInsensitive))
-								{
-									wkhtmltopdf_add_object(pdf_converter, pdf_object_settings, src);
-								}else{
-									wkhtmltopdf_set_object_setting(pdf_object_settings, "page", src);
-									wkhtmltopdf_add_object(pdf_converter, pdf_object_settings, NULL);
-								}
-		
-							}//src
-							
-						}else
-						{
-							if(kCFCompareEqualTo == CFStringCompare(html, CFSTR("YES"), kCFCompareCaseInsensitive))
-							{
-								image_converter = wkhtmltoimage_create_converter(image_global_settings, src);
-							}else{
-								wkhtmltoimage_set_global_setting(image_global_settings, "in", src);
-								image_converter = wkhtmltoimage_create_converter(image_global_settings, NULL);
-							}
-							if(wkhtmltoimage_convert(image_converter))
-							{
-								const unsigned char *bytes;
-								long len = wkhtmltoimage_get_output(image_converter, &bytes);
-								CFDataRef data = CFDataCreate(kCFAllocatorDefault, (const UInt8 *)bytes, len);
-								CFDictionarySetValue(dict, CFSTR("data"), data);
-								CFRelease(data);
-							}
-							wkhtmltoimage_destroy_converter(image_converter);
-							break;
-						}
-						
-					}//sources
-				}//USERINFOKEY_OPTIONS
-				
-				if(isOutputPDF)
+				}//options
+				if([type isEqualToString:@"html"])
 				{
-					if(wkhtmltopdf_convert(pdf_converter))
-					{
-						const unsigned char *bytes;
-						long len = wkhtmltopdf_get_output(pdf_converter, &bytes);
-						CFDataRef data = CFDataCreate(kCFAllocatorDefault, (const UInt8 *)bytes, len);
-						CFDictionarySetValue(dict, CFSTR("data"), data);
-						CFRelease(data);
-					}
+					wkhtmltopdf_add_object(pdf_converter, pdf_object_settings, [data UTF8String]);
+				}else{
+					wkhtmltopdf_set_object_setting(pdf_object_settings, "page", [data UTF8String]);
+					wkhtmltopdf_add_object(pdf_converter, pdf_object_settings, NULL);
 				}
+			}
+		}
+	}//sources
+	
+	/* convert */
+	
+	if(wkhtmltopdf_convert(pdf_converter))
+	{
+		const unsigned char *bytes;
+		long len = wkhtmltopdf_get_output(pdf_converter, &bytes);
+		pdf = [NSData dataWithBytes:(const void *)bytes length:len];
+	}
+	
+	/* cleanup */
+	
+	for(std::vector<wkhtmltopdf_object_settings *>::iterator v = object_settings.begin(); v != object_settings.end(); ++v)
+	{
+		wkhtmltopdf_object_settings *pdf_object_settings = *v;
+		wkhtmltopdf_destroy_object_settings(pdf_object_settings);
+	}
 		
-			}	//USERINFOKEY_SOURCES
-			
-			/* cleanup */
-			
-			for(std::vector<wkhtmltopdf_object_settings *>::iterator v = object_settings.begin(); v != object_settings.end(); ++v)
+	object_settings.clear();
+		
+	if(pdf_converter)
+	{
+		wkhtmltopdf_destroy_converter(pdf_converter);
+	}
+
+	if(pdf_global_settings)
+	{
+		wkhtmltopdf_destroy_global_settings(pdf_global_settings);
+	}
+
+	return pdf;
+}
+
+- (NSData *)processImage:(NSArray *)sources
+									format:(NSNumber *)format
+								 options:(NSArray *)options
+{
+	NSData *image = [NSData data];
+	
+	wkhtmltoimage_global_settings *image_global_settings = wkhtmltoimage_create_global_settings();
+	
+	switch ([format intValue])
+	{
+		case HTMLTOX_Format_JPG:
+			wkhtmltoimage_set_global_setting(image_global_settings, "fmt", "jpg");
+			break;
+		case HTMLTOX_Format_BMP:
+			wkhtmltoimage_set_global_setting(image_global_settings, "fmt", "bmp");
+			break;
+		case HTMLTOX_Format_SVG:
+			wkhtmltoimage_set_global_setting(image_global_settings, "fmt", "svg");
+			break;
+		default:
+			wkhtmltoimage_set_global_setting(image_global_settings, "fmt", "png");
+			break;
+	};
+	
+	NSLog(@"global options: %@\n", [options description]);
+	NSLog(@"sources: %@\n", [sources description]);
+	
+	/* global options */
+	
+	for(NSUInteger i = 0; i < [options count]; ++i)
+	{
+		NSDictionary *option = [options objectAtIndex:i];
+		if(option)
+		{
+			NSString *name = [option valueForKey:@"name"];
+			NSString *value = [option valueForKey:@"value"];
+			if((name) && (value) && [name length] && [value length])
 			{
-				wkhtmltopdf_object_settings *pdf_object_settings = *v;
-				wkhtmltopdf_destroy_object_settings(pdf_object_settings);
+				NSArray *components = [name componentsSeparatedByString:@":"];
+				if([components count] == 1)
+				{
+					wkhtmltoimage_set_global_setting(image_global_settings, [name UTF8String], [value UTF8String]);
+					NSLog(@"global option: %@, %@\n", name, value);
+				}
 			}
-			object_settings.clear();
-			
-			if(pdf_converter)
-			{
-				wkhtmltopdf_destroy_converter(pdf_converter);
-			}
-			
-			if(pdf_global_settings)
-			{
-				wkhtmltopdf_destroy_global_settings(pdf_global_settings);
-			}
-			
-			CFNumberRef process_4d_n = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &process_4d);
-			CFNumberRef process_os_n = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &process_os);
-			
-			CFDictionarySetValue(dict, USERINFOKEY_PID, process_4d_n);
-			CFDictionarySetValue(dict, USERINFOKEY_PID_OS, process_os_n);
-			
-			CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(),
-																					 htmltox_notification_name,
-																					 NULL, dict, true);
-			
-			CFRelease(process_os_n);
-			CFRelease(process_4d_n);
-			CFRelease(dict);
 		}
 	}
+	
+	for(NSUInteger i = 0; i < [sources count]; ++i)
+	{
+		NSDictionary *source = [sources objectAtIndex:i];
+		if(source)
+		{
+			NSString *data = [source valueForKey:@"data"];
+			NSString *type = [source valueForKey:@"type"];
+			if((data) && (type) && [data length] && [type length])
+			{
+				wkhtmltoimage_converter *image_converter = 0;
+				if([type isEqualToString:@"html"])
+				{
+					image_converter = wkhtmltoimage_create_converter(image_global_settings, [data UTF8String]);
+				}else{
+					wkhtmltoimage_set_global_setting(image_global_settings, "in", [data UTF8String]);
+					image_converter = wkhtmltoimage_create_converter(image_global_settings, NULL);
+				}
+				if(wkhtmltoimage_convert(image_converter))
+				{
+					const unsigned char *bytes;
+					long len = wkhtmltoimage_get_output(image_converter, &bytes);
+					image = [NSData dataWithBytes:(const void *)bytes length:len];
+				}
+				wkhtmltoimage_destroy_converter(image_converter);
+				
+				break;
+			}
+		}
+	}//sources
+	
+	return image;
 }
 
-void status(CFStringRef status)
-{
-	CFMutableDictionaryRef dict = CFDictionaryCreateMutable(kCFAllocatorDefault, 0,
-																													&kCFTypeDictionaryKeyCallBacks,
-																													&kCFTypeDictionaryValueCallBacks);
-	
-	CFNumberRef process_4d_n = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &process_4d);
-	CFNumberRef process_os_n = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &process_os);
-	
-	CFDictionarySetValue(dict, USERINFOKEY_PID, process_4d_n);
-	CFDictionarySetValue(dict, USERINFOKEY_PID_OS, process_os_n);
-	CFDictionarySetValue(dict, USERINFOKEY_STATUS, status);
-	
-	CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(),
-																			 htmltox_notification_name,
-																			 NULL, dict, true);
-	
-	CFRelease(process_os_n);
-	CFRelease(process_4d_n);
-	CFRelease(dict);
-}
-
-#pragma mark -
-
-void listen_start()
-{
-	CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(),
-																	NULL,	//this parameter may be NULL
-																	process_notification,
-																	htmltox4d_notification_name,	//this value must not be NULL
-																	NULL,	//if NULL, callback is called when a notification named name is posted by any object
-																	CFNotificationSuspensionBehaviorDeliverImmediately);	//irst flush any queued notifications
-
-	status(CFSTR("OK"));
-}
-
-void listen_stop()
-{
-	CFNotificationCenterRemoveObserver(CFNotificationCenterGetDistributedCenter(),
-																		 NULL,
-																		 htmltox4d_notification_name,
-																		 NULL);
-}
+@end
 
 #pragma mark -
 
 int main(int argc, const char * argv[])
 {
-	for(unsigned int i=1; i<(argc-1); ++i)
+	wkhtmltopdf_init(0);
+
+	HTMLTOX *htmltox = [[HTMLTOX alloc]init];
+	NSConnection *connection = [[NSConnection alloc]init];
+	[connection setRootObject:htmltox];
+	
+	if([connection registerName:HTMLTOX_CONNECTION_NAME])
 	{
-		if(!strcmp("pid", argv[i]))
-		{
-			process_4d = atoi(argv[i+1]);
-		}else if(!strcmp("pidos", argv[i]))
-		{
-			process_os = atoi(argv[i+1]);
-		}
+		NSLog(@"registered conenction: %@\n", HTMLTOX_CONNECTION_NAME);
+	}else
+	{
+		NSLog(@"failed to register conenction: %@\n", HTMLTOX_CONNECTION_NAME);
 	}
 	
-	if((process_4d) && (process_os))
-	{
-		wkhtmltopdf_init(0);
-	
-		listen_start();
-		
-		CFRunLoopRun();
-		
-		listen_stop();
-		
-		wkhtmltopdf_deinit();
-	}else{
-		status(CFSTR("KO"));	//just to unfreeze the caller
-	}
-	
+	CFRunLoopRun();
+
+	[connection release];
+
+	wkhtmltopdf_deinit();
+
 	return 0;
 }
