@@ -15,7 +15,7 @@
 
 Based on [wkhtmltopdf 0.12.2.3](http://wkhtmltopdf.org/).
 
-###Syntax
+##Syntax
 
 ```
 document:=HTML Convert(sources;format;optionNames;optionValues)
@@ -29,19 +29,7 @@ optionNames|ARRAY TEXT|http://wkhtmltopdf.org/libwkhtmltox/
 optionValues|ARRAY TEXT|http://wkhtmltopdf.org/libwkhtmltox/
 document|BLOB|PDF or image
 
-###New in 3.0
-
-Callback feature is deprecated. 
-
-You can pass file path, URL or raw HTML as source.
-
-The helper app is launched per process and stays running for the lifetime of that process.
-
-``libwkhtmltox`` is no longer linked as a dylib; instead, a command line program is invoked internally.
-
-**TODO**: ~~Check caller process ID so that multiple instances of 4D can use the plugin.~~ done in ``3.0``
-
-###Examples
+##Examples
 
 * HTML to PDF
 
@@ -113,3 +101,15 @@ $path:=Temporary folder+Generate UUID+".jpg"
 BLOB TO DOCUMENT($path;$resultBlob)
 OPEN URL($path)
 ```
+
+###New in 3.0
+
+Callback feature is deprecated. 
+
+You can pass file path, URL or raw HTML as source.
+
+The helper app is launched per process and stays running for the lifetime of that process.
+
+``libwkhtmltox`` is no longer linked as a dylib; instead, a command line program is invoked internally.
+
+**TODO**: ~~Check caller process ID so that multiple instances of 4D can use the plugin.~~ done in ``3.0``
