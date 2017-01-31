@@ -102,7 +102,9 @@ BLOB TO DOCUMENT($path;$resultBlob)
 OPEN URL($path)
 ```
 
-###New in 3.0
+##History
+
+###3.0
 
 Callback feature is deprecated. 
 
