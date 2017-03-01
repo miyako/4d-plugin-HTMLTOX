@@ -126,9 +126,13 @@ void LaunchHelper()
 	
 	if(!connection)
 	{
+		[[NSFileManager defaultManager] setAttributes:@{NSFilePosixPermissions:@0755}
+																		 ofItemAtPath:launchPath
+																						error:nil];
+
 		if([[NSWorkspace sharedWorkspace]launchApplication:launchPath])
 		{
-			NSLog(@"launched appliation: %@\n", launchPath);
+			NSLog(@"launched application: %@\n", launchPath);
 			PA_long32 pid = PA_GetCurrentProcessNumber();
 			
 			for(int i = 1; 1 < 100; ++i)
@@ -140,12 +144,12 @@ void LaunchHelper()
 			
 			if(!connection)
 			{
-				NSLog(@"failed to launch appliation: %@\n", launchPath);
+				NSLog(@"failed to launch application: %@\n", launchPath);
 			}
 			
 		}else
 		{
-			NSLog(@"failed to launch appliation: %@\n", launchPath);
+			NSLog(@"failed to launch application: %@\n", launchPath);
 		}
 	}else
 	{
