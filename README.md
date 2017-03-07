@@ -7,7 +7,7 @@
 
 | carbon | cocoa | win32 | win64 |
 |:------:|:-----:|:---------:|:---------:|
-|<img src="https://cloud.githubusercontent.com/assets/1725068/22371562/1b091f0a-e4db-11e6-8458-8653954a7cce.png" width="24" height="24" />|<img src="https://cloud.githubusercontent.com/assets/1725068/22371562/1b091f0a-e4db-11e6-8458-8653954a7cce.png" width="24" height="24" />| | |
+|<img src="https://cloud.githubusercontent.com/assets/1725068/22371562/1b091f0a-e4db-11e6-8458-8653954a7cce.png" width="24" height="24" />|<img src="https://cloud.githubusercontent.com/assets/1725068/22371562/1b091f0a-e4db-11e6-8458-8653954a7cce.png" width="24" height="24" />|<img src="https://cloud.githubusercontent.com/assets/1725068/22371562/1b091f0a-e4db-11e6-8458-8653954a7cce.png" width="24" height="24" />|<img src="https://cloud.githubusercontent.com/assets/1725068/22371562/1b091f0a-e4db-11e6-8458-8653954a7cce.png" width="24" height="24" />|
 
 ###Version
 
@@ -104,14 +104,14 @@ OPEN URL($path)
 
 To set per-page option, prepend the option name by its source number (1-based).
 
-The plugin processes the source array from element number 0, so to specify an option for a single source, the code would look like:
+~~The plugin processes the source array from element number 0, so to specify an option for a single source~~.
 
 ```
 ARRAY TEXT($optionKeys;0)
 ARRAY TEXT($optionValues;0)
 
-ARRAY TEXT($html;0)
-$html{0}:=System folder(Desktop)+"source.html"
+ARRAY TEXT($html;1)
+$html{1}:=System folder(Desktop)+"source.html"
 
 APPEND TO ARRAY($optionKeys;"1:web.printMediaType")
 APPEND TO ARRAY($optionValues;"true")
