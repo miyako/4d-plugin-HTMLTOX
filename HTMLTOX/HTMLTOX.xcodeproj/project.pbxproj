@@ -52,6 +52,9 @@
 		D13116F41A03C7AF00DE1322 /* ARRAY_DATE.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D13116F21A03C7AF00DE1322 /* ARRAY_DATE.cpp */; };
 		D13116F51A03C7AF00DE1322 /* ARRAY_DATE.h in Headers */ = {isa = PBXBuildFile; fileRef = D13116F31A03C7AF00DE1322 /* ARRAY_DATE.h */; };
 		D134D4AC1A030BA0008D14EF /* manifest.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = D134D4A91A030B06008D14EF /* manifest.json */; };
+		D14D84F81E6CFEF00085C8A5 /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = D14D84F61E6CFEF00085C8A5 /* cJSON.c */; settings = {ASSET_TAGS = (); }; };
+		D14D84F91E6CFEF00085C8A5 /* cJSON.h in Headers */ = {isa = PBXBuildFile; fileRef = D14D84F71E6CFEF00085C8A5 /* cJSON.h */; settings = {ASSET_TAGS = (); }; };
+		D14D84FB1E6D12F50085C8A5 /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = D14D84F61E6CFEF00085C8A5 /* cJSON.c */; settings = {ASSET_TAGS = (); }; };
 		D168FD041DE2D103008B27DC /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = D168FD031DE2D103008B27DC /* main.c */; };
 		D168FD0A1DE2DF66008B27DC /* libwkhtmltox.0.12.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D168FD091DE2DF66008B27DC /* libwkhtmltox.0.12.3.dylib */; };
 		D16E9C341DF167C500725A87 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D16E9C331DF167C500725A87 /* Foundation.framework */; };
@@ -129,6 +132,8 @@
 		D13116F31A03C7AF00DE1322 /* ARRAY_DATE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ARRAY_DATE.h; path = Classes/ARRAY_DATE.h; sourceTree = "<group>"; };
 		D134D4A91A030B06008D14EF /* manifest.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
 		D14D10DD1A03A8A5008B3411 /* constants.xlf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = constants.xlf; sourceTree = "<group>"; };
+		D14D84F61E6CFEF00085C8A5 /* cJSON.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = cJSON.c; path = cJSON/cJSON.c; sourceTree = "<group>"; };
+		D14D84F71E6CFEF00085C8A5 /* cJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cJSON.h; path = cJSON/cJSON.h; sourceTree = "<group>"; };
 		D168FD011DE2D103008B27DC /* wkhtmltox-4d */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "wkhtmltox-4d"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D168FD031DE2D103008B27DC /* main.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = main.c; sourceTree = "<group>"; };
 		D168FD091DE2DF66008B27DC /* libwkhtmltox.0.12.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libwkhtmltox.0.12.3.dylib; path = HTMLTOX.4dbase/Plugins/HTMLTOX.bundle/Contents/MacOS/libwkhtmltox.0.12.3.dylib; sourceTree = "<group>"; };
@@ -164,6 +169,7 @@
 		089C166AFE841209C02AAC07 /* HTMLTOX */ = {
 			isa = PBXGroup;
 			children = (
+				D14D84FA1E6CFEFA0085C8A5 /* cJSON */,
 				D108BD7A1A03D1E6001F1B90 /* Manifest */,
 				08FB77ADFE841716C02AAC07 /* Source */,
 				089C167CFE841241C02AAC07 /* Resources */,
@@ -286,6 +292,15 @@
 			name = ARRAY;
 			sourceTree = "<group>";
 		};
+		D14D84FA1E6CFEFA0085C8A5 /* cJSON */ = {
+			isa = PBXGroup;
+			children = (
+				D14D84F61E6CFEF00085C8A5 /* cJSON.c */,
+				D14D84F71E6CFEF00085C8A5 /* cJSON.h */,
+			);
+			name = cJSON;
+			sourceTree = "<group>";
+		};
 		D168FD021DE2D103008B27DC /* wkhtmltox-4d */ = {
 			isa = PBXGroup;
 			children = (
@@ -328,6 +343,7 @@
 				D13116BB1A03B3C300DE1322 /* C_REAL.h in Headers */,
 				D13116E71A03BC1100DE1322 /* ARRAY_LONGINT.h in Headers */,
 				D13116C51A03B48900DE1322 /* C_TEXT.h in Headers */,
+				D14D84F91E6CFEF00085C8A5 /* cJSON.h in Headers */,
 				D13116AD1A03B10800DE1322 /* C_LONGINT.h in Headers */,
 				D120937F13534DCC00A72CAA /* 4DPlugin.h in Headers */,
 				D13116E51A03BC1100DE1322 /* ARRAY_INTEGER.h in Headers */,
@@ -452,6 +468,7 @@
 				D13116EC1A03BE2300DE1322 /* ARRAY_TIME.cpp in Sources */,
 				D13116B01A03B33D00DE1322 /* C_INTEGER.cpp in Sources */,
 				D13116A91A03ACB700DE1322 /* 4DPluginAPI.c in Sources */,
+				D14D84F81E6CFEF00085C8A5 /* cJSON.c in Sources */,
 				D13116E21A03BC1100DE1322 /* ARRAY_BOOLEAN.cpp in Sources */,
 				D13116BA1A03B3C300DE1322 /* C_REAL.cpp in Sources */,
 				D13116F41A03C7AF00DE1322 /* ARRAY_DATE.cpp in Sources */,
@@ -463,6 +480,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D168FD041DE2D103008B27DC /* main.c in Sources */,
+				D14D84FB1E6D12F50085C8A5 /* cJSON.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

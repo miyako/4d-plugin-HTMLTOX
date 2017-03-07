@@ -12,6 +12,166 @@
 #include "4DPluginAPI.h"
 #include "4DPlugin.h"
 
+#if VERSIONWIN
+
+#include "Shlwapi.h"
+#include "Rpc.h"
+#pragma comment(lib, "Shlwapi.lib")
+#pragma comment(lib, "Rpcrt4.lib")
+
+#define PLUGIN_EXECUTABLE_NAME L"HTMLTOX.4DX"
+#define HELPER_EXECUTABLE_NAME L"WKHTMLTOX_4D.EXE"
+#define HELPER_EVENT_PREFIX L"WKHTMLTOX_4D"
+
+wchar_t	launchPath[_MAX_PATH] = {0};
+
+void winTalkToHelper(CUTF8String &json, C_BLOB &returnValue)
+{
+	std::wstring uuid = HELPER_EVENT_PREFIX;
+	
+	//suffix uuid
+	UUID _uuid;
+	if(UuidCreate(&_uuid) == RPC_S_OK)
+	{
+		RPC_WSTR flagPtr;
+		if(UuidToString(&_uuid, &flagPtr) == RPC_S_OK)
+		{
+			uuid += std::wstring((const wchar_t *)flagPtr, 32 + 4);
+			RpcStringFree(&flagPtr);
+		}//UuidToString
+	}//UuidCreate
+	
+	DWORD flagLen = uuid.size() * sizeof(wchar_t);
+	DWORD inDataLen = json.size();
+	DWORD len = sizeof(flagLen) + sizeof(inDataLen) + flagLen + inDataLen;
+
+	BOOL success = FALSE;
+	
+	//send request
+	HANDLE fmIn = CreateFileMapping(
+																	INVALID_HANDLE_VALUE,
+																	NULL,
+																	PAGE_READWRITE,
+																	0, len,
+																	PARAM_IN);
+	if(fmIn)
+	{
+		LPVOID bufIn = MapViewOfFile(fmIn, FILE_MAP_WRITE, 0, 0, len);
+		if(bufIn)
+		{
+			try
+			{
+				//send request
+				unsigned char *p = (unsigned char *)bufIn;
+				CopyMemory(p, &flagLen, sizeof(flagLen));
+				p += sizeof(flagLen);
+				CopyMemory(p, &inDataLen, sizeof(inDataLen));
+				p += sizeof(inDataLen);
+				CopyMemory(p, uuid.c_str(), flagLen);
+				p += flagLen;
+				CopyMemory(p, json.c_str(), inDataLen);
+				success = TRUE;
+			}
+			catch(...)
+			{
+				
+			}
+			UnmapViewOfFile(bufIn);
+		}//bufIn
+		//do not close fmIn yet!
+	}//fmIn
+	
+	if(success)
+	{
+		HANDLE helper_c = OpenEvent(EVENT_ALL_ACCESS, FALSE, FLAG_HELPER_IDLE);
+		HANDLE helper_s = OpenEvent(EVENT_ALL_ACCESS, FALSE, FLAG_HELPER_BUSY);
+		HANDLE helperFinished = CreateEvent(NULL, TRUE, FALSE, (LPCTSTR)uuid.c_str());
+		
+		if(helper_s)
+		{
+			if(helper_c)
+			{
+				if(helperFinished)
+				{
+					SetEvent(helper_s);//call helper
+					WaitForSingleObject(helperFinished, INFINITE);//wait for helper
+					CloseHandle(helperFinished);
+					
+					//first, create file mapping for header only (DWORD)
+					DWORD outDataLen = 0;
+					DWORD len = sizeof(outDataLen);
+					HANDLE fmOut = CreateFileMapping(
+																					 INVALID_HANDLE_VALUE,
+																					 NULL,
+																					 PAGE_READWRITE,
+																					 0, len,
+																					 PARAM_OUT);
+					if(fmOut)
+					{
+						LPVOID bufOut = MapViewOfFile(fmOut, FILE_MAP_READ, 0, 0, len);
+						if(bufOut)
+						{
+							unsigned char *p = (unsigned char *)bufOut;
+							try
+							{
+								CopyMemory(&outDataLen, p, sizeof(outDataLen));
+							}
+							catch(...)
+							{
+								
+							}
+							UnmapViewOfFile(bufOut);
+						}//bufOut
+						CloseHandle(fmOut);
+					}//fmOut
+					//next, create file mapping for entire request
+					if (outDataLen)
+					{
+						len = len + outDataLen;
+						fmOut = CreateFileMapping(
+							INVALID_HANDLE_VALUE,
+							NULL,
+							PAGE_READWRITE,
+							0, len,
+							PARAM_OUT);
+						if (fmOut)
+						{
+							LPVOID bufOut = MapViewOfFile(fmOut, FILE_MAP_READ, 0, 0, len);
+
+							if (bufOut)
+							{
+								unsigned char *p = (unsigned char *)bufOut;
+								p += sizeof(outDataLen);
+								std::vector<uint8_t>outData(outDataLen);
+								try
+								{
+									CopyMemory(&outData[0], p, outDataLen);
+									returnValue.setBytes((const uint8_t *)&outData[0], outDataLen);
+								}
+								catch (...)
+								{
+
+								}
+								UnmapViewOfFile(bufOut);
+							}//bufOut
+							CloseHandle(fmOut);
+						}//fmOut
+					}
+				}
+				SetEvent(helper_c);//call helper
+				CloseHandle(helper_c);
+			}//helper_c
+			CloseHandle(helper_s);
+		}//helper_s
+	}
+	if (fmIn) CloseHandle(fmIn);
+}
+#endif
+
+#pragma mark -
+
+#if VERSIONMAC
+
 NSString *launchPath;
 
 NSArray *copySources(ARRAY_TEXT &inObjects)
@@ -108,6 +268,8 @@ NSArray *copyOptions(ARRAY_TEXT &inOptionName, ARRAY_TEXT &inOptionValue)
 	return options;
 }
 
+#endif
+
 #pragma mark -
 
 bool IsProcessOnExit()
@@ -122,6 +284,7 @@ bool IsProcessOnExit()
 
 void LaunchHelper()
 {
+#if VERSIONMAC
 	NSConnection *connection = [NSConnection connectionWithRegisteredName:HTMLTOX_CONNECTION_NAME host:nil];
 	
 	if(!connection)
@@ -155,10 +318,47 @@ void LaunchHelper()
 	{
 		NSLog(@"connection is ready: %@\n", HTMLTOX_CONNECTION_NAME);
 	}
+#else
+	HANDLE signal = OpenEvent(EVENT_ALL_ACCESS, FALSE, FLAG_IS_HELPER_READY);
+	
+	if(!signal)
+	{
+		if(32 < (int)ShellExecute(NULL, NULL, launchPath, NULL, NULL, SW_HIDE))
+		{
+			OutputDebugString(L"launched application");
+			PA_long32 pid = PA_GetCurrentProcessNumber();
+			
+			for(int i = 1; 1 < 100; ++i)
+			{
+				PA_PutProcessToSleep(pid, 6);
+				signal = OpenEvent(EVENT_ALL_ACCESS, FALSE, FLAG_IS_HELPER_READY);
+				if(signal) break;
+			}
+			
+			if(!signal)
+			{
+				OutputDebugString(L"failed to launch application");
+			}else
+			{
+				CloseHandle(signal);
+			}
+			
+		}else
+		{
+		OutputDebugString(L"failed to launch application");
+		}
+		
+	}else
+	{
+		OutputDebugString(L"connection is ready");
+		CloseHandle(signal);
+	}
+#endif
 }
 
 void StopHelper()
 {
+#if VERSIONMAC
 	NSConnection *connection = [NSConnection connectionWithRegisteredName:HTMLTOX_CONNECTION_NAME host:nil];
 	
 	if(connection)
@@ -169,10 +369,25 @@ void StopHelper()
 	{
 		NSLog(@"connection already dead: %@\n", HTMLTOX_CONNECTION_NAME);
 	}
+#else
+	HANDLE signal = OpenEvent(EVENT_ALL_ACCESS, FALSE, FLAG_IS_HELPER_READY);
+	
+	if(signal)
+	{
+		CUTF8String json;
+		C_BLOB returnValue;
+		winTalkToHelper(json, returnValue);
+		CloseHandle(signal);
+	}else
+	{
+		OutputDebugString(L"connection already dead");
+	}
+#endif
 }
 
 void OnStartup()
 {
+#if VERSIONMAC
 	NSBundle *bundle = [NSBundle bundleWithIdentifier:@"com.4D.4DPlugin.HTMLTOX-4"];
 	
 	if(bundle)
@@ -182,6 +397,20 @@ void OnStartup()
 		
 		LaunchHelper();
 	}
+#else
+	//find executable path next to this plugin 4dx
+	wchar_t	fDrive[_MAX_DRIVE], fDir[_MAX_DIR], fName[_MAX_FNAME], fExt[_MAX_EXT];
+	wchar_t pluginExecutablePath[_MAX_PATH] = {0};
+	HMODULE h = GetModuleHandleW(PLUGIN_EXECUTABLE_NAME);
+	if(h)
+	{
+		GetModuleFileNameW(h, pluginExecutablePath, _MAX_PATH);
+		_wsplitpath_s(pluginExecutablePath, fDrive, fDir, fName, fExt);
+		_wmakepath_s(launchPath, fDrive, fDir, HELPER_EXECUTABLE_NAME, NULL);
+		
+		LaunchHelper();
+	}
+#endif
 }
 
 void OnExit()
@@ -241,6 +470,112 @@ void CommandDispatcher (PA_long32 pProcNum, sLONG_PTR *pResult, PackagePtr pPara
 
 // ------------------------------------ HTMLTOX -----------------------------------
 
+#if TEST_WIN_ON_MAC | !__APPLE__
+bool startsWith(CUTF8String &source, const char *pre)
+{
+	const char *str = (const char *)source.c_str();
+	size_t lenpre = strlen(pre),
+	lenstr = strlen(str);
+	return lenstr < lenpre ? false : strncmp(pre, str, lenpre) == 0;
+}
+bool fileExists(CUTF8String &path)
+{
+	bool exists = false;
+	
+	C_TEXT temp;
+	temp.setUTF8String(&path);
+	
+#if VERSIONMAC
+	NSString *_path = temp.copyUTF16String();
+	exists = [[NSFileManager defaultManager]fileExistsAtPath:_path];
+	[_path release];
+#else
+	exists = PathFileExists((LPCTSTR)temp.getUTF16StringPtr());
+#endif
+	return exists;
+}
+void winCopySources(cJSON *root, ARRAY_TEXT &inObjects)
+{
+	cJSON *sources = cJSON_CreateArray();
+	
+	for(unsigned int i = 0; i < inObjects.getSize(); ++i)
+	{
+		CUTF8String source;
+		inObjects.copyUTF8StringAtIndex(&source, i);
+	
+		if( startsWith(source, "http://")
+			 ||startsWith(source, "ftp://")
+			 ||startsWith(source, "https://")
+			 ||startsWith(source, "file://")
+			 )
+		{
+			// the sources is a url
+			cJSON *option = cJSON_CreateObject();
+			cJSON_AddStringToObject(option, "data", (const char *)source.c_str());
+			cJSON_AddStringToObject(option, "type", "url");
+			cJSON_AddItemToArray(sources, option);
+		}else{
+			// the sources is a path
+			inObjects.copyPathAtIndex(&source, i);
+			if(fileExists(source))
+			{
+				cJSON *option = cJSON_CreateObject();
+				cJSON_AddStringToObject(option, "data", (const char *)source.c_str());
+				cJSON_AddStringToObject(option, "type", "path");
+				cJSON_AddItemToArray(sources, option);
+			}else{
+				//the sources is html
+				cJSON *option = cJSON_CreateObject();
+				cJSON_AddStringToObject(option, "data", (const char *)source.c_str());
+				cJSON_AddStringToObject(option, "type", "html");
+				cJSON_AddItemToArray(sources, option);
+			}
+		}
+	}
+	cJSON_AddItemToObject(root, "sources", sources);
+}
+void winGetFormat(cJSON *root, C_LONGINT &inOutputFormat)
+{
+	int fmt = inOutputFormat.getIntValue();
+	switch (fmt)
+	{
+		case HTMLTOX_Format_PDF:
+		case HTMLTOX_Format_PS:
+		case HTMLTOX_Format_PNG:
+		case HTMLTOX_Format_JPG:
+		case HTMLTOX_Format_BMP:
+		case HTMLTOX_Format_SVG:
+			break;
+		default:
+			fmt = HTMLTOX_Format_PDF;
+			break;
+	};
+	cJSON_AddNumberToObject(root, "format", fmt);
+}
+void winCopyOptions(cJSON *root, ARRAY_TEXT &inOptionName, ARRAY_TEXT &inOptionValue)
+{
+	cJSON *options = cJSON_CreateArray();
+	
+	size_t countOptions = inOptionName.getSize();
+	if(countOptions == inOptionValue.getSize())
+	{
+		for(size_t i = 0; i < countOptions; ++i)
+		{
+			CUTF8String name, value;
+			inOptionName.copyUTF8StringAtIndex(&name, i);
+			inOptionValue.copyUTF8StringAtIndex(&value, i);
+			cJSON *option = cJSON_CreateObject();
+			cJSON_AddStringToObject(option, "name", (const char *)name.c_str());
+			cJSON_AddStringToObject(option, "value", (const char *)value.c_str());
+			cJSON_AddItemToArray(options, option);
+		}
+	}
+	cJSON_AddItemToObject(root, "options", options);
+}
+#endif
+
+#pragma mark -
+
 void HTML_Convert(sLONG_PTR *pResult, PackagePtr pParams)
 {
 	ARRAY_TEXT inObjects;
@@ -254,26 +589,52 @@ void HTML_Convert(sLONG_PTR *pResult, PackagePtr pParams)
 	inOptionName.fromParamAtIndex(pParams, 3);
 	inOptionValue.fromParamAtIndex(pParams, 4);
 
-	NSArray *sources = copySources(inObjects);
-	NSNumber *format = getFormat(inOutputFormat);
-	NSArray *options = copyOptions(inOptionName, inOptionValue);
-
 	LaunchHelper();
 	
-	NSConnection *connection = [NSConnection connectionWithRegisteredName:HTMLTOX_CONNECTION_NAME host:nil];
+#ifdef __APPLE__
 	
+	NSConnection *connection = [NSConnection connectionWithRegisteredName:HTMLTOX_CONNECTION_NAME host:nil];
+
 	if(connection)
 	{
 		HTMLTOX *htmltox = (HTMLTOX *)[connection rootProxy];
-		
+#if TEST_WIN_ON_MAC
+		CUTF8String json;
+		cJSON *root = cJSON_CreateObject();
+		winCopySources(root, inObjects);
+		winGetFormat(root, inOutputFormat);
+		winCopyOptions(root, inOptionName, inOptionValue);
+		json = CUTF8String((const uint8_t *)cJSON_PrintUnformatted(root));
+		NSData *params = [[NSData alloc]initWithBytes:json.c_str() length:json.size()];
+		NSData *data = [htmltox doIt:params];
+		returnValue.setBytes((const uint8_t *)[data bytes], [data length]);
+		[params release];
+		cJSON_Delete(root);
+#else
+		NSArray *sources = copySources(inObjects);
+		NSNumber *format = getFormat(inOutputFormat);
+		NSArray *options = copyOptions(inOptionName, inOptionValue);
+
 		NSData *data = [htmltox doIt:sources
 													format:format
 												 options:options];
-		
 		returnValue.setBytes((const uint8_t *)[data bytes], [data length]);
+		[sources release];
+		[options release];
+#endif
 	}
+#else
+	//windows
+	CUTF8String json;
+	cJSON *root = cJSON_CreateObject();
+	winCopySources(root, inObjects);
+	winGetFormat(root, inOutputFormat);
+	winCopyOptions(root, inOptionName, inOptionValue);
+	json = CUTF8String((const uint8_t *)cJSON_PrintUnformatted(root));
+	cJSON_Delete(root);
 	
-	[sources release];
+	winTalkToHelper(json, returnValue);
 	
+#endif
 	returnValue.setReturn(pResult);
 }

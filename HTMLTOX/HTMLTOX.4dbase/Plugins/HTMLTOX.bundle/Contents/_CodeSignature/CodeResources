@@ -100,11 +100,15 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			hy9ma1pfJOfNiU2XvIKRCiI3Vxo=
+			o7d5raaMCsjt4p2eiwSpsvauOgk=
 			</data>
 			<key>optional</key>
 			<true/>
 		</dict>
+		<key>Resources/LICENSE (cJSON)</key>
+		<data>
+		FK+r+BjM4SO4AFSh69nlp+405mI=
+		</data>
 		<key>Resources/constants.xlf</key>
 		<data>
 		aX+yftrwil6xxJ77mFrQotYAEQ8=
@@ -134,7 +138,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			9ubzuBbzdtSc83S6UT8zA20ZyWY=
+			O/ygKY2qtP4JhsLuVPNgCARwUVs=
 			</data>
 			<key>requirement</key>
 			<string>anchor apple generic and identifier "wkhtmltox-4d" and (certificate leaf[field.1.2.840.113635.100.6.1.9] /* exists */ or certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = Y69CWUC25B)</string>
@@ -407,14 +411,25 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			hy9ma1pfJOfNiU2XvIKRCiI3Vxo=
+			o7d5raaMCsjt4p2eiwSpsvauOgk=
 			</data>
 			<key>hash2</key>
 			<data>
-			0LLohEuws+DLx+BpsjKyuOCfNFPU233pUS6vQEadO+Q=
+			xCQ8LCNuu5S2Eh1V0rgK8qJoxZx+VitMVLj+i4W3fXU=
 			</data>
 			<key>optional</key>
 			<true/>
+		</dict>
+		<key>Resources/LICENSE (cJSON)</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			FK+r+BjM4SO4AFSh69nlp+405mI=
+			</data>
+			<key>hash2</key>
+			<data>
+			5Hdz9PcJwiq5Aiaw7rXT1MIMVKI7UzB6aIR65sBYt10=
+			</data>
 		</dict>
 		<key>Resources/constants.xlf</key>
 		<dict>
@@ -431,11 +446,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			8WH79l2tgViHfCYSUBu+HCIQ5Es=
+			d4BBX6XD0oO0g7faKeshpNQ8zQM=
 			</data>
 			<key>hash2</key>
 			<data>
-			rp5mwPoToTOMBrO5g9ATVRBDkkR1XpJE6MF06FX5mo0=
+			Lr+4xjR+kLhPMA3aTNBS6Q5jpNrmvKOvGIzLP01La/w=
 			</data>
 		</dict>
 		<key>Windows/HTMLTOX.html</key>
@@ -449,15 +464,37 @@
 			EKLRdLPtg+PsdxOrCPdnhlHZLbWCJYLapu/sbQTYgHg=
 			</data>
 		</dict>
+		<key>Windows/wkhtmltox.dll</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			1R3FUvaUsAZT2JKmV1dY03RFCRY=
+			</data>
+			<key>hash2</key>
+			<data>
+			bQ6Zv0tL1QAuDWgAZZOosP1UKhosVAp9leoiv+rV1ao=
+			</data>
+		</dict>
+		<key>Windows/wkhtmltox_4d.exe</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			0RJyX++/yuFGZNqOyNy6+Nwxrlw=
+			</data>
+			<key>hash2</key>
+			<data>
+			S0drctiBuliXgOWVU/33p8ddyyK19jrqonPrceaVkjY=
+			</data>
+		</dict>
 		<key>Windows64/HTMLTOX.4DX</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			r1aAHLsl1HqPOxOjnnlVMBT8weQ=
+			pbfyKEXKWndoBkBidudWKfzQpgY=
 			</data>
 			<key>hash2</key>
 			<data>
-			D81BlAXC8IYBjKsGDu0nx8Zm3OxlDG6/r2pFvj/FY7A=
+			udzBfXMU6W3U1j+sJobIZHaZij7ywwB3ese7DQ799I4=
 			</data>
 		</dict>
 		<key>Windows64/HTMLTOX.html</key>
@@ -469,6 +506,28 @@
 			<key>hash2</key>
 			<data>
 			EKLRdLPtg+PsdxOrCPdnhlHZLbWCJYLapu/sbQTYgHg=
+			</data>
+		</dict>
+		<key>Windows64/wkhtmltox.dll</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			utnim/houj8+4e4c07M/nJl03Cs=
+			</data>
+			<key>hash2</key>
+			<data>
+			Z2P8wHB+ygp/jQJJX7WNnJligr0yhXOILYu73mBmbxk=
+			</data>
+		</dict>
+		<key>Windows64/wkhtmltox_4d.exe</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			JtyQK/bD4+lQ8vQQrnSgDu70lbQ=
+			</data>
+			<key>hash2</key>
+			<data>
+			uBk6B5J88Gem9edCfdxCqJG2K42uSQjrqxLIDz4vG80=
 			</data>
 		</dict>
 		<key>manifest.json</key>
