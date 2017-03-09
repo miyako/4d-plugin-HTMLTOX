@@ -138,4 +138,6 @@ The helper app is launched per process and stays running for the lifetime of tha
 
 ##Remarks
 
-When used on a Mac client connected to Windows server, the executable bit of the helper app may be lost. You might need to use ``chmod`` locally on the helper app's executable file. 
+~~When used on a Mac client connected to Windows server, the executable bit of the helper app may be lost. You might need to use ``chmod`` locally on the helper app's executable file. ~~
+
+The plugin now changes the bits internally.
