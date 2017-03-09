@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+<assemblyIdentity
+    version="1.0.0.0"
+    processorArchitecture="IA64"
+    name="wkhtmltox_4d"
+    type="win32"
+/>
+<description>wkhtmltox_4d</description>
+<dependency>
+    <dependentAssembly>
+       <assemblyIdentity
+           type="win32"
+           name="com.4D.wkhtmltox_4d"
+           version="6.0.0.0"
+           processorArchitecture="IA64"/>
+    </dependentAssembly>
+</dependency>
+</assembly>

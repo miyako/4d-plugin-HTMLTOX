@@ -297,6 +297,9 @@
       <EntryPointSymbol>
       </EntryPointSymbol>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>$(ProjectDir)\manifest\32\$(TargetFileName).manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -319,6 +322,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>$(ProjectDir)\manifest\64\$(TargetFileName).manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -138,10 +138,10 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			O/ygKY2qtP4JhsLuVPNgCARwUVs=
+			MmFCwfnETS/qzmWPwjf1oI42jPI=
 			</data>
 			<key>requirement</key>
-			<string>anchor apple generic and identifier "wkhtmltox-4d" and (certificate leaf[field.1.2.840.113635.100.6.1.9] /* exists */ or certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = Y69CWUC25B)</string>
+			<string>identifier "wkhtmltox-4d" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = Y69CWUC25B</string>
 		</dict>
 		<key>QuickLook/Thumbnail.png</key>
 		<dict>
@@ -446,11 +446,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			d4BBX6XD0oO0g7faKeshpNQ8zQM=
+			tALVkBsD/if5Ro3xQqGCE5zsP+Y=
 			</data>
 			<key>hash2</key>
 			<data>
-			Lr+4xjR+kLhPMA3aTNBS6Q5jpNrmvKOvGIzLP01La/w=
+			R+T/AfObLymOro8C0vvpCThHPrfKArbDJrP0uQgxF/M=
+			</data>
+		</dict>
+		<key>Windows/HTMLTOX.4DX.manifest</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			Is8JwGWyVg3rJDPZ+p5kF/BVppw=
+			</data>
+			<key>hash2</key>
+			<data>
+			9+ti5La0TS1WATO7DhDM7njzO2la81fXd+M2EsrBN04=
 			</data>
 		</dict>
 		<key>Windows/HTMLTOX.html</key>
@@ -462,6 +473,50 @@
 			<key>hash2</key>
 			<data>
 			EKLRdLPtg+PsdxOrCPdnhlHZLbWCJYLapu/sbQTYgHg=
+			</data>
+		</dict>
+		<key>Windows/com.4D.HTMLTOX.manifest</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			BHVA4FU34RmJnYFqxGuxgnXhLfA=
+			</data>
+			<key>hash2</key>
+			<data>
+			Ha9I1k6BRHXMzhN6qQMbdaaHAj/Eb+Ha4kARZCk01nc=
+			</data>
+		</dict>
+		<key>Windows/com.4D.wkhtmltox_4d.manifest</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			H/wt3JSWOmV/TQyN68GaqCCB0io=
+			</data>
+			<key>hash2</key>
+			<data>
+			8UZy/QNeXs82dSWSRsCuR5obHtG8/fvykbjWaB6F8pg=
+			</data>
+		</dict>
+		<key>Windows/msvcp140.dll</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			rT+l+7xCltSpAeqURgdi+vPWorg=
+			</data>
+			<key>hash2</key>
+			<data>
+			u+zf2iVRsBqhYAXIgwWYLDYKn7m6PZvi+xXy6cbrgJ8=
+			</data>
+		</dict>
+		<key>Windows/vcruntime140.dll</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			4cxTE74fffTENpf49wEwVYX+TnE=
+			</data>
+			<key>hash2</key>
+			<data>
+			vjijjiISivmlKa8z0fAt0ksqNE0pF1k54inPOigGc+Q=
 			</data>
 		</dict>
 		<key>Windows/wkhtmltox.dll</key>
@@ -479,22 +534,44 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			0RJyX++/yuFGZNqOyNy6+Nwxrlw=
+			aQ6FO4r2DjRsrQzuaCeWpovA6AI=
 			</data>
 			<key>hash2</key>
 			<data>
-			S0drctiBuliXgOWVU/33p8ddyyK19jrqonPrceaVkjY=
+			xOhG68aYe5Ao9DSg0z0sVTK0PqfzYaSPu3+LULYsCR8=
+			</data>
+		</dict>
+		<key>Windows/wkhtmltox_4d.exe.manifest</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			+ZqIH1QtS+xCrBc3M7YGm/3lTt4=
+			</data>
+			<key>hash2</key>
+			<data>
+			nBXjCy0TrBA8/rNAFM7RO82u+vomD9vMx8k5PCp51tA=
 			</data>
 		</dict>
 		<key>Windows64/HTMLTOX.4DX</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			pbfyKEXKWndoBkBidudWKfzQpgY=
+			DfRen57gNLSsWuK7sXVDy0xtivY=
 			</data>
 			<key>hash2</key>
 			<data>
-			udzBfXMU6W3U1j+sJobIZHaZij7ywwB3ese7DQ799I4=
+			loxwX/Gers7vkHCkeldiV6pPIPrJYivm9wiIpMdMhZs=
+			</data>
+		</dict>
+		<key>Windows64/HTMLTOX.4DX.manifest</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			p09799t4ETUzO8UiMyESmHc1MlE=
+			</data>
+			<key>hash2</key>
+			<data>
+			sSLizWxCfmTRhQU0e5P24jKZtdXOUIyWJ/2NGDKtHKg=
 			</data>
 		</dict>
 		<key>Windows64/HTMLTOX.html</key>
@@ -506,6 +583,50 @@
 			<key>hash2</key>
 			<data>
 			EKLRdLPtg+PsdxOrCPdnhlHZLbWCJYLapu/sbQTYgHg=
+			</data>
+		</dict>
+		<key>Windows64/com.4D.HTMLTOX.manifest</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			x2Uk97UoDbpQi3ijkdRmj1drYbM=
+			</data>
+			<key>hash2</key>
+			<data>
+			Cr/wiODEE1irx5YkB7s1wBU9fbkAwzWY/AMtiTgsR1Y=
+			</data>
+		</dict>
+		<key>Windows64/com.4D.wkhtmltox_4d.manifest</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			egnGzgxYgr4R2FgGDE8dwqSS8nQ=
+			</data>
+			<key>hash2</key>
+			<data>
+			ww8BVGLrCs8YntiK7hG3wURlJ41A5urrWhxwAl3EzaQ=
+			</data>
+		</dict>
+		<key>Windows64/msvcp140.dll</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			syPeJC8h85zxzKQZi6GrtS5qoPs=
+			</data>
+			<key>hash2</key>
+			<data>
+			dfx2ZVYxpK5y0BW46F+JlTfGA2Yco1o/KQmbjkyEcWw=
+			</data>
+		</dict>
+		<key>Windows64/vcruntime140.dll</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			s8lscYcZGnDACIZBVC3sSL9LW68=
+			</data>
+			<key>hash2</key>
+			<data>
+			2p0yKrLYkagzEvGU5wBgseLR5uzYekz/Wo9ydFPBxLg=
 			</data>
 		</dict>
 		<key>Windows64/wkhtmltox.dll</key>
@@ -523,11 +644,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			JtyQK/bD4+lQ8vQQrnSgDu70lbQ=
+			x5wvJdJBegZOIgGP11Goz6kcjr0=
 			</data>
 			<key>hash2</key>
 			<data>
-			uBk6B5J88Gem9edCfdxCqJG2K42uSQjrqxLIDz4vG80=
+			19ISUjcwVqbpifbwes7J2ySUEVgSkS59dzsISgVZy7k=
+			</data>
+		</dict>
+		<key>Windows64/wkhtmltox_4d.exe.manifest</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			zox2+V4+KOpe6cuW7PMBtTtgBE8=
+			</data>
+			<key>hash2</key>
+			<data>
+			cp1zY/072jubV3Aq3jqh8khlwU8IyYSzC6w5pfrWQFc=
 			</data>
 		</dict>
 		<key>manifest.json</key>
