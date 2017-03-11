@@ -11,6 +11,9 @@
 #include "wkhtmltox_4d.h"
 #include <vector>
 #include <iterator>
+#ifndef uint8_t
+#define uint8_t unsigned int
+#endif
 #endif
 
 #if TEST_WIN_ON_MAC | !__APPLE__
