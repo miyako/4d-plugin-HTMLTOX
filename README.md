@@ -9,13 +9,13 @@
 |:------:|:-----:|:---------:|:---------:|
 |<img src="https://cloud.githubusercontent.com/assets/1725068/22371562/1b091f0a-e4db-11e6-8458-8653954a7cce.png" width="24" height="24" />|<img src="https://cloud.githubusercontent.com/assets/1725068/22371562/1b091f0a-e4db-11e6-8458-8653954a7cce.png" width="24" height="24" />|<img src="https://cloud.githubusercontent.com/assets/1725068/22371562/1b091f0a-e4db-11e6-8458-8653954a7cce.png" width="24" height="24" />|<img src="https://cloud.githubusercontent.com/assets/1725068/22371562/1b091f0a-e4db-11e6-8458-8653954a7cce.png" width="24" height="24" />|
 
-###Version
+### Version
 
 <img src="https://cloud.githubusercontent.com/assets/1725068/18940649/21945000-8645-11e6-86ed-4a0f800e5a73.png" width="32" height="32" /> <img src="https://cloud.githubusercontent.com/assets/1725068/18940648/2192ddba-8645-11e6-864d-6d5692d55717.png" width="32" height="32" />
 
 Based on [wkhtmltopdf 0.12.2.3](http://wkhtmltopdf.org/).
 
-##Syntax
+## Syntax
 
 ```
 document:=HTML Convert(sources;format;optionNames;optionValues)
@@ -29,7 +29,7 @@ optionNames|ARRAY TEXT|http://wkhtmltopdf.org/libwkhtmltox/
 optionValues|ARRAY TEXT|http://wkhtmltopdf.org/libwkhtmltox/
 document|BLOB|PDF or image
 
-##Examples
+## Examples
 
 * HTML to PDF
 
@@ -122,9 +122,9 @@ BLOB TO DOCUMENT($dstPath;$resultBlob)
 OPEN URL($dstPath)
 ```
 
-##History
+## History
 
-###v3.0
+### v3.0
 
 Callback feature is deprecated. 
 
@@ -136,7 +136,7 @@ The helper app is launched per process and stays running for the lifetime of tha
 
 **TODO**: ~~Check caller process ID so that multiple instances of 4D can use the plugin.~~ done in ``3.0``
 
-##Remarks
+## Remarks
 
 ~~When used on a Mac client connected to Windows server, the executable bit of the helper app may be lost. You might need to use ``chmod`` locally on the helper app's executable file.~~
 
