@@ -31,7 +31,7 @@ document|BLOB|PDF or image
 
 ## Quick Download
 
-Mac+Windows-MinGW (https://github.com/miyako/4d-plugin-HTMLTOX/releases/download/v4.1.m/HTMLTOX.zip)
+[Mac+Windows-MinGW](https://github.com/miyako/4d-plugin-HTMLTOX/releases/download/v4.1.m/HTMLTOX.zip)
 
 ## Examples
 
