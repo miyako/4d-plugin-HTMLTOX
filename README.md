@@ -3,7 +3,7 @@
 
 4D implementation of wkhtmltopdf
 
-###Platform
+### Platform
 
 | carbon | cocoa | win32 | win64 |
 |:------:|:-----:|:---------:|:---------:|
@@ -28,6 +28,10 @@ format|INT32|``HTMLTOX Format PDF``, ``HTMLTOX Format PS``, ``HTMLTOX Format PNG
 optionNames|ARRAY TEXT|http://wkhtmltopdf.org/libwkhtmltox/
 optionValues|ARRAY TEXT|http://wkhtmltopdf.org/libwkhtmltox/
 document|BLOB|PDF or image
+
+## Quick Download
+
+Mac+Windows-MinGW (https://github.com/miyako/4d-plugin-HTMLTOX/releases/download/v4.1.m/HTMLTOX.zip)
 
 ## Examples
 
