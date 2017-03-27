@@ -33,6 +33,8 @@ document|BLOB|PDF or image
 
 [Mac+Windows-MinGW](https://github.com/miyako/4d-plugin-HTMLTOX/releases/download/v4.1.m/HTMLTOX.zip)
 
+[Mac+Windows-VC](https://github.com/miyako/4d-plugin-HTMLTOX/releases/download/v4.1.v/HTMLTOX.zip)
+
 ## Examples
 
 * HTML to PDF
