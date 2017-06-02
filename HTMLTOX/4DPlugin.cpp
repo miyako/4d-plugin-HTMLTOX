@@ -604,11 +604,14 @@ void HTML_Convert(sLONG_PTR *pResult, PackagePtr pParams)
 		winCopySources(root, inObjects);
 		winGetFormat(root, inOutputFormat);
 		winCopyOptions(root, inOptionName, inOptionValue);
-		json = CUTF8String((const uint8_t *)cJSON_PrintUnformatted(root));
+		char *str = cJSON_PrintUnformatted(root);
+		json = CUTF8String((const uint8_t *)str);
 		NSData *params = [[NSData alloc]initWithBytes:json.c_str() length:json.size()];
 		NSData *data = [htmltox doIt:params];
 		returnValue.setBytes((const uint8_t *)[data bytes], [data length]);
 		[params release];
+		
+		free(str);
 		cJSON_Delete(root);
 #else
 		NSArray *sources = copySources(inObjects);
@@ -630,11 +633,13 @@ void HTML_Convert(sLONG_PTR *pResult, PackagePtr pParams)
 	winCopySources(root, inObjects);
 	winGetFormat(root, inOutputFormat);
 	winCopyOptions(root, inOptionName, inOptionValue);
-	json = CUTF8String((const uint8_t *)cJSON_PrintUnformatted(root));
-	cJSON_Delete(root);
-	
+	char *str = cJSON_PrintUnformatted(root);
+	json = CUTF8String((const uint8_t *)str);
+
 	winTalkToHelper(json, returnValue);
 	
+	free(str);
+	cJSON_Delete(root);
 #endif
 	returnValue.setReturn(pResult);
 }
