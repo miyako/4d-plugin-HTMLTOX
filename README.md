@@ -31,6 +31,8 @@ document|BLOB|PDF or image
 
 ## Quick Download
 
+[Mac-0.12.4](https://github.com/miyako/4d-plugin-HTMLTOX/releases/tag/0.12.4) [font size is about 25%](https://github.com/wkhtmltopdf/wkhtmltopdf/issues/3241) but the program can process unicode paths  
+
 [Mac+Windows-MinGW](https://github.com/miyako/4d-plugin-HTMLTOX/releases/download/v4.1.m/HTMLTOX.zip)
 
 [Mac+Windows-VC](https://github.com/miyako/4d-plugin-HTMLTOX/releases/download/v4.1.v/HTMLTOX.zip)
