@@ -3,7 +3,7 @@
 
 4D implementation of wkhtmltopdf
 
-**Deprecated** Use [4d-component-wkhtmltopdf](https://github.com/miyako/4d-component-wkhtmltopdf/) instead.
+**Deprecated!** Use [4d-component-wkhtmltopdf](https://github.com/miyako/4d-component-wkhtmltopdf/) instead.
 
 ### Platform
 
